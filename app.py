@@ -22,7 +22,7 @@ elif camera_image:
 
     image = Image.open(camera_image)
 
-if (uploaded_file) | (camera_image):
+if uploaded_file or camera_image:
 
     results = model(image)
 
