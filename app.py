@@ -23,7 +23,7 @@ st.subheader("예시 이미지")
 col_a, col_b, col_c = st.columns(3)
 
 with col_a:
-    st.image("gray_mold.jpg", use_container_width=True)
+    st.image("gray_mold.png", use_container_width=True)
 
 with col_b:
     st.image("powdery_mildew.jpg", use_container_width=True)
