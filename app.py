@@ -18,6 +18,24 @@ st.warning("""
 정확한 진단은 전문가 확인이 필요합니다.
 """)
 
+st.subheader("예시 이미지")
+
+st.image([
+    "gray_mold.png",
+    "powdery_mildew.jpg"
+], width=200)
+
+with st.sidebar:
+
+    st.header("설정")
+
+    conf_threshold = st.slider(
+        "Confidence Threshold",
+        0.1,
+        1.0,
+        0.5
+    )
+
 colum1, colum2 = st.columns(2)
 
 with colum1:
@@ -95,7 +113,8 @@ if uploaded_file or camera_image:
             st.progress(confidence)
             st.write(f"신뢰도: {conf:.2f}")
 
-        with st.expander("병해 상세 정보"):
+        with st.container(border=True):
+        # with st.expander("병해 상세 정보"):
             st.write(info["cause"])
 
             st.write(info["solution"])
@@ -107,6 +126,8 @@ if uploaded_file or camera_image:
     else:
         with col2:
             st.subheader("탐지된 병해충이 없습니다.")
+            st.success("건강한 딸기로 보입니다 🍓")
+            st.balloons()
 
 st.markdown("---")
 
