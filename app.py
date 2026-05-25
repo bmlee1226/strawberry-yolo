@@ -48,9 +48,9 @@ with st.sidebar:
         값이 낮을수록 더 많은 객체를 탐지합니다.
         """)
 
-colum1, colum2 = st.columns(2)
-
 st.divider()
+
+colum1, colum2 = st.columns(2)
 
 with colum1:
 
@@ -91,7 +91,6 @@ disease_info = {
     }
 }
 
-st.divider()
 
 if uploaded_file:
 
@@ -102,6 +101,7 @@ elif camera_image:
     image = Image.open(camera_image)
 
 if uploaded_file or camera_image:
+    st.divider()
 
     with st.spinner("AI가 병해충을 분석중입니다..."):
         results = model(image, conf=conf_threshold)
