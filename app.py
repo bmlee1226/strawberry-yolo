@@ -26,7 +26,7 @@ disease_info = {
         "name": "흰가루병 (powdery_mildew) 입니다.",
         "cause": "고온다습한 환경에서 발생",
         "solution": "환기 개선 및 감염 잎 제거",
-        "image": "powdery_mildew.png"
+        "image": "powdery_mildew.jpg"
     },
     
     "healthy": {
