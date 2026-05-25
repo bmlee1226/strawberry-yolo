@@ -6,6 +6,18 @@ model = YOLO("best.pt")
 
 st.title("딸기 병해충 탐지")
 
+st.markdown("""
+딸기 이미지를 업로드하면  
+AI가 병해충을 탐지하고 원인 및 해결 방법을 안내합니다.
+""")
+
+st.info("현재 지원: 흰가루병, 잿빛곰팡이병")
+
+st.warning("""
+본 결과는 AI 예측이며
+정확한 진단은 전문가 확인이 필요합니다.
+""")
+
 colum1, colum2 = st.columns(2)
 
 with colum1:
@@ -24,22 +36,22 @@ disease_info = {
 disease_info = {
     0: {
         "name": "잿빛곰팡이병 (gray_mold) 입니다.",
-        "cause": "원인: 습도가 높고 통풍이 부족할 때 발생",
-        "solution": "해결책: 습도 조절 및 병든 부위 제거",
+        "cause": "🦠 원인: 습도가 높고 통풍이 부족할 때 발생",
+        "solution": "💊 해결책: 습도 조절 및 병든 부위 제거",
         "image": "gray_mold.png"
     },
     
     1: {
         "name": "흰가루병 (powdery_mildew) 입니다.",
-        "cause": "원인: 고온다습한 환경에서 발생",
-        "solution": "해결책: 환기 개선 및 감염 잎 제거",
+        "cause": "🦠 원인: 고온다습한 환경에서 발생",
+        "solution": "💊 해결책: 환기 개선 및 감염 잎 제거",
         "image": "powdery_mildew.jpg"
     },
     
     "healthy": {
         "name": "정상입니다.",
-        "cause": "건강한 상태",
-        "solution": "현재 상태 유지",
+        "cause": "🦠 원인:건강한 상태",
+        "solution": "💊 해결책:현재 상태 유지",
         "image": "healthy.png"
     }
 }
@@ -56,7 +68,8 @@ elif camera_image:
 
 if uploaded_file or camera_image:
 
-    results = model(image)
+    with st.spinner("AI가 병해충을 분석중입니다..."):
+        results = model(image)
 
     plotted = results[0].plot()
 
@@ -77,6 +90,9 @@ if uploaded_file or camera_image:
         
         with col2:
             st.subheader(info["name"])
+
+            confidence = float(conf)
+            st.progress(confidence)
             st.write(f"신뢰도: {conf:.2f}")
 
         with st.expander("병해 상세 정보"):
@@ -91,4 +107,8 @@ if uploaded_file or camera_image:
     else:
         with col2:
             st.subheader("탐지된 병해충이 없습니다.")
+
+st.markdown("---")
+
+st.caption("YOLO 기반 딸기 병해충 진단 시스템")
 
