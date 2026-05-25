@@ -18,30 +18,30 @@ if uploaded_file:
 
     image = Image.open(uploaded_file)
 
-    results = model(image)
-
-    plotted = results[0].plot()
-
-    st.image(plotted)
-
-    best_idx = results[0].boxes.conf.argmax()
-
-    class_name = int(results[0].boxes.cls[best_idx])
-
-    st.write(disease_info[class_name])
-
-if camera_image:
+elif camera_image:
 
     image = Image.open(camera_image)
 
+if (uploaded_file) | (camera_image):
+
     results = model(image)
 
     plotted = results[0].plot()
 
     st.image(plotted)
 
-    best_idx = results[0].boxes.conf.argmax()
+    if len(results[0].boxes) > 0:
 
-    class_name = int(results[0].boxes.cls[best_idx])
+        best_idx = results[0].boxes.conf.argmax()
+    
+        class_id = int(results[0].boxes.cls[best_idx])
+    
+        conf = float(results[0].boxes.conf[best_idx])
+    
+        st.write(f"클래스: {disease_info[class_id]}")
+        st.write(f"신뢰도: {conf:.2f}")
+    
+    else:
+        st.warning("탐지된 병해충이 없습니다.")
 
-    st.write(disease_info[class_name])
+
