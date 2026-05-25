@@ -6,8 +6,15 @@ model = YOLO("best.pt")
 
 st.title("딸기 병해충 탐지")
 
-uploaded_file = st.file_uploader("이미지 업로드")
-camera_image = st.camera_input("사진 촬영")
+colum1, colum2 = st.columns(2)
+
+with colum1:
+
+    uploaded_file = st.file_uploader("이미지 업로드")
+
+with colum2:
+    
+    camera_image = st.camera_input("사진 촬영")
 
 disease_info = {
     0: "잿빛곰팡이병 (gray_mold) 입니다.",
@@ -72,18 +79,18 @@ if uploaded_file or camera_image:
             st.subheader(info["name"])
             st.write(f"신뢰도: {conf:.2f}")
 
-            with st.expander("병해 상세 정보"):
-                st.write("원인:")
-                st.write(info["cause"])
+        with st.expander("병해 상세 정보"):
+            st.write("원인:")
+            st.write(info["cause"])
 
-                st.write("해결책:")
-                st.write(info["solution"])
+            st.write("해결책:")
+            st.write(info["solution"])
 
-                st.write("예시 이미지")
-        
-                st.image(info["image"])
+            st.write("예시 이미지")
+    
+            st.image(info["image"])
     
     else:
-        st.warning("탐지된 병해충이 없습니다.")
-
+        with col2:
+            st.subheader("탐지된 병해충이 없습니다.")
 
