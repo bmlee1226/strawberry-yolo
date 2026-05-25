@@ -39,13 +39,15 @@ with st.sidebar:
 
     conf_threshold = st.slider(
         "신뢰도 임계값 (Confidence Threshold)",
-        0.1,
-        1.0,
-        0.5
+        min_value=0.1,
+        max_value=1.0,
+        value=0.3,
+        step=0.05
     )
 
     st.caption("""
-        값이 낮을수록 더 많은 객체를 탐지합니다.
+        값이 낮을수록 더 많은 병해를 탐지하지만
+오탐 가능성이 증가할 수 있습니다.
         """)
 
 st.divider()
