@@ -80,13 +80,11 @@ if uploaded_file or camera_image:
             st.write(f"신뢰도: {conf:.2f}")
 
         with st.expander("병해 상세 정보"):
-            st.write("원인:")
-            st.write(info["cause"])
+            st.write("원인: {info["cause"]}")
 
-            st.write("해결책:")
-            st.write(info["solution"])
+            st.write("해결책: {info["solution"]}")
 
-            st.write("예시 이미지")
+            st.write("<예시 이미지>")
     
             st.image(info["image"])
     
