@@ -4,7 +4,7 @@ from PIL import Image
 
 model = YOLO("best.pt")
 
-st.title("딸기 병해충 탐지")
+st.title("🍓 딸기 병해충 진단 AI")
 
 st.markdown("""
 딸기 이미지를 업로드하면  
@@ -138,16 +138,14 @@ if uploaded_file or camera_image:
 
             st.write(info["solution"])
 
-            with st.container(border=True):
-                st.write("예시 이미지")
-                st.image(info["image"])
-                st.caption("흰가루병")
+            st.write("🍓 병해 예시 이미지")
+            st.image(info["image"])
+            st.caption(info["name"])
     
     else:
         with col2:
             st.subheader("탐지된 병해충이 없습니다.")
             st.success("건강한 딸기로 보입니다 🍓")
-            st.balloons()
 
 st.markdown("---")
 
