@@ -24,15 +24,15 @@ disease_info = {
 disease_info = {
     0: {
         "name": "잿빛곰팡이병 (gray_mold) 입니다.",
-        "cause": "습도가 높고 통풍이 부족할 때 발생",
-        "solution": "습도 조절 및 병든 부위 제거",
+        "cause": "원인: 습도가 높고 통풍이 부족할 때 발생",
+        "solution": "해결책: 습도 조절 및 병든 부위 제거",
         "image": "gray_mold.png"
     },
     
     1: {
         "name": "흰가루병 (powdery_mildew) 입니다.",
-        "cause": "고온다습한 환경에서 발생",
-        "solution": "환기 개선 및 감염 잎 제거",
+        "cause": "원인: 고온다습한 환경에서 발생",
+        "solution": "해결책: 환기 개선 및 감염 잎 제거",
         "image": "powdery_mildew.jpg"
     },
     
@@ -80,9 +80,9 @@ if uploaded_file or camera_image:
             st.write(f"신뢰도: {conf:.2f}")
 
         with st.expander("병해 상세 정보"):
-            st.write("원인: {info["cause"]}")
+            st.write(info["cause"])
 
-            st.write("해결책: {info["solution"]}")
+            st.write(info["solution"])
 
             st.write("<예시 이미지>")
     
