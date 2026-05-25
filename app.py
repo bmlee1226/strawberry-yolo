@@ -19,21 +19,21 @@ disease_info = {
         "name": "잿빛곰팡이병 (gray_mold) 입니다.",
         "cause": "습도가 높고 통풍이 부족할 때 발생",
         "solution": "습도 조절 및 병든 부위 제거",
-        "image": "examples/gray_mold.jpg"
+        "image": "gray_mold.png"
     },
     
     1: {
         "name": "흰가루병 (powdery_mildew) 입니다.",
         "cause": "고온다습한 환경에서 발생",
         "solution": "환기 개선 및 감염 잎 제거",
-        "image": "examples/powdery_mildew.jpg"
+        "image": "powdery_mildew.png"
     },
     
     "healthy": {
         "name": "정상입니다.",
         "cause": "건강한 상태",
         "solution": "현재 상태 유지",
-        "image": "examples/healthy.jpg"
+        "image": "healthy.png"
     }
 }
 
