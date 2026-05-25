@@ -20,23 +20,37 @@ st.warning("""
 
 st.subheader("예시 이미지")
 
-st.image([
-    "gray_mold.png",
-    "powdery_mildew.jpg"
-], width=200)
+col_a, col_b, col_c = st.columns(3)
+
+with col_a:
+    st.image("gray_mold.jpg", use_container_width=True)
+
+with col_b:
+    st.image("powdery_mildew.jpg", use_container_width=True)
+
+with col_c:
+    st.image("healthy.png", use_container_width=True)
 
 with st.sidebar:
 
-    st.header("설정")
+    st.header("⚙️ 설정")
+
+    st.divider()
 
     conf_threshold = st.slider(
-        "Confidence Threshold",
+        "신뢰도 임계값 (Confidence Threshold)",
         0.1,
         1.0,
         0.5
     )
 
+    st.caption("""
+        값이 낮을수록 더 많은 객체를 탐지합니다.
+        """)
+
 colum1, colum2 = st.columns(2)
+
+st.divider()
 
 with colum1:
 
@@ -53,28 +67,31 @@ disease_info = {
 
 disease_info = {
     0: {
-        "name": "잿빛곰팡이병 (gray_mold) 입니다.",
+        "name": "잿빛곰팡이병 (gray_mold)",
+        "explain": "잿빛곰팡이병 (gray_mold) 입니다.",
         "cause": "🦠 원인: 습도가 높고 통풍이 부족할 때 발생",
         "solution": "💊 해결책: 습도 조절 및 병든 부위 제거",
         "image": "gray_mold.png"
     },
     
     1: {
-        "name": "흰가루병 (powdery_mildew) 입니다.",
+        "name": "흰가루병 (powdery_mildew)" ,
+        "explain": "흰가루병 (powdery_mildew) 입니다.",
         "cause": "🦠 원인: 고온다습한 환경에서 발생",
         "solution": "💊 해결책: 환기 개선 및 감염 잎 제거",
         "image": "powdery_mildew.jpg"
     },
     
     "healthy": {
-        "name": "정상입니다.",
+        "name": "정상",
+        "explain": "정상입니다.",
         "cause": "🦠 원인:건강한 상태",
         "solution": "💊 해결책:현재 상태 유지",
         "image": "healthy.png"
     }
 }
 
-
+st.divider()
 
 if uploaded_file:
 
@@ -87,7 +104,7 @@ elif camera_image:
 if uploaded_file or camera_image:
 
     with st.spinner("AI가 병해충을 분석중입니다..."):
-        results = model(image)
+        results = model(image, conf=conf_threshold)
 
     plotted = results[0].plot()
 
@@ -107,7 +124,7 @@ if uploaded_file or camera_image:
         info = disease_info[class_id]
         
         with col2:
-            st.subheader(info["name"])
+            st.subheader(info["explain"])
 
             confidence = float(conf)
             st.progress(confidence)
@@ -119,9 +136,10 @@ if uploaded_file or camera_image:
 
             st.write(info["solution"])
 
-            st.write("<예시 이미지>")
-    
-            st.image(info["image"])
+            with st.container(border=True):
+                st.write("예시 이미지")
+                st.image(info["image"])
+                st.caption("흰가루병")
     
     else:
         with col2:
