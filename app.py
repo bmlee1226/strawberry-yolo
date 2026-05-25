@@ -2,7 +2,11 @@ import streamlit as st
 from ultralytics import YOLO
 from PIL import Image
 
-model = YOLO("best.pt")
+@st.cache_resource
+def load_model():
+    return YOLO("best.pt")
+
+model = load_model()
 
 st.title("🍓 딸기 병해충 진단 AI")
 
