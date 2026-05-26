@@ -163,46 +163,46 @@ if uploaded_file or camera_image:
     with st.spinner("AI가 병해충을 분석중입니다..."):
         results = model(image, conf=conf_threshold)
 
-    plotted = results[0].plot()
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.image(plotted)
-
-    if len(results[0].boxes) > 0:
-
-        best_idx = results[0].boxes.conf.argmax()
+        plotted = results[0].plot()
     
-        class_id = int(results[0].boxes.cls[best_idx])
+        col1, col2 = st.columns(2)
     
-        conf = float(results[0].boxes.conf[best_idx])
-
-        info = disease_info[class_id]
+        with col1:
+            st.image(plotted)
+    
+        if len(results[0].boxes) > 0:
+    
+            best_idx = results[0].boxes.conf.argmax()
         
-        with col2:
-            st.subheader(info["explain"])
-
-            confidence = float(conf)
-            st.progress(confidence)
-            st.write(f"신뢰도: {conf:.2f}")
-
-        with st.container(border=True):
-        # with st.expander("🎯 병해 상세 정보"):
-            st.write(info["symptom"])
+            class_id = int(results[0].boxes.cls[best_idx])
         
-            st.write(info["cause"])
-
-            st.write(info["solution"])
-
-            st.write("🍓 병해 예시 이미지")
-            st.image(info["image"])
-            st.caption(info["name"])
+            conf = float(results[0].boxes.conf[best_idx])
     
-    else:
-        with col2:
-            st.subheader("탐지된 병해충이 없습니다.")
-            st.success("건강한 딸기로 보입니다 🍓")
+            info = disease_info[class_id]
+            
+            with col2:
+                st.subheader(info["explain"])
+    
+                confidence = float(conf)
+                st.progress(confidence)
+                st.write(f"신뢰도: {conf:.2f}")
+    
+            with st.container(border=True):
+            # with st.expander("🎯 병해 상세 정보"):
+                st.write(info["symptom"])
+            
+                st.write(info["cause"])
+    
+                st.write(info["solution"])
+    
+                st.write("🍓 병해 예시 이미지")
+                st.image(info["image"])
+                st.caption(info["name"])
+        
+        else:
+            with col2:
+                st.subheader("탐지된 병해충이 없습니다.")
+                st.success("건강한 딸기로 보입니다 🍓")
 
 st.markdown("---")
 
