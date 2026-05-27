@@ -248,7 +248,7 @@ elif st.session_state.page == "video":
         type=["mp4", "avi", "mov"]
     )
 
-    elif uploaded_video_file is not None:
+    if uploaded_video_file is not None:
 
         st.session_state.uploaded_file = uploaded_video_file
 
