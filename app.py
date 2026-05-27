@@ -282,6 +282,8 @@ if uploaded_video_file is not None:
                 
                     class_id = int(results[0].boxes.cls[best_idx])
 
+                    info = disease_info[class_id]
+
                     detected_classes.add(class_id)
                 
                     conf = float(results[0].boxes.conf[best_idx])
