@@ -170,13 +170,9 @@ elif uploaded_video_file is not None:
     tfile = tempfile.NamedTemporaryFile(delete=False)
     tfile.write(uploaded_video_file.read())
 
-    st.write("임시 저장 경로:")
-    st.write(tfile.name)
-
     cap = cv2.VideoCapture(tfile.name)
     
     fps = cap.get(cv2.CAP_PROP_FPS)
-    st.write(f"FPS: {fps}")
 
 
 
@@ -246,17 +242,31 @@ if uploaded_video_file is not None:
         frame_count = 0
         saved_count = 0
 
+        detection_counts = 0
+
+        detected_classes = set()
+        
+        progress_bar = st.progress(0)
+
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
         while True:
             ret, frame = cap.read()
         
             if not ret:
                 break
+
+            # 진행률 표시
+            progress = min(frame_count / total_frames, 1.0)
+
+            progress_bar.progress(progress)
+
         
             # 1초마다 1프레임 저장
             if frame_count % int(fps) == 0:
         
                 results = model(frame, conf=conf_threshold)
-        
+
                 plotted = results[0].plot()
         
                 col1, col2 = st.columns(2)
@@ -265,14 +275,16 @@ if uploaded_video_file is not None:
                     st.image(plotted)
             
                 if len(results[0].boxes) > 0:
+
+                    detection_counts += 1
             
                     best_idx = results[0].boxes.conf.argmax()
                 
                     class_id = int(results[0].boxes.cls[best_idx])
+
+                    detected_classes.add(class_id)
                 
                     conf = float(results[0].boxes.conf[best_idx])
-            
-                    info = disease_info[class_id]
                     
                     with col2:
                         st.subheader(info["explain"])
@@ -280,8 +292,33 @@ if uploaded_video_file is not None:
                         confidence = float(conf)
                         st.progress(confidence)
                         st.write(f"신뢰도: {conf:.2f}")
-            
-                    with st.container(border=True):
+
+                else:
+                    with col2:
+                        st.subheader("탐지된 병해충이 없습니다.")
+                        st.success("건강한 딸기로 보입니다 🍓")
+
+            frame_count += 1
+
+        progress_bar.empty()
+
+        # -----------------------------------
+        # 결과 출력
+        # -----------------------------------
+
+        st.header("📊 병해충 탐지 결과")
+
+        if detection_counts == 0:
+
+            st.success("✅ 병해충이 탐지되지 않았습니다.")
+
+        else:
+            for class_id in detected_classes:
+
+                info = disease_info[class_id]
+                st.header(f"🩺 {info["name"]} 병해충 정보")
+
+                with st.container(border=True):
                     # with st.expander("🎯 병해 상세 정보"):
                         st.write(info["symptom"])
                     
@@ -292,14 +329,6 @@ if uploaded_video_file is not None:
                         st.write("🍓 병해 예시 이미지")
                         st.image(info["image"])
                         st.caption(info["name"])
-                
-                else:
-                    with col2:
-                        st.subheader("탐지된 병해충이 없습니다.")
-                        st.success("건강한 딸기로 보입니다 🍓")
-
-            frame_count += 1
-        
         
 
 
