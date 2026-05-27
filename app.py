@@ -153,9 +153,6 @@ if st.session_state.page == "home":
     st.session_state.conf_threshold = conf_threshold
 
     st.write("원하는 분석 방식을 선택하세요.")
-
-    st.write("이미지 분석: 정지 이미지를 빠르게 분석")
-    st.write("동영상 분석: 넓은 구역 병해 탐지에 추천")
     
     st.divider()
     
@@ -170,6 +167,8 @@ if st.session_state.page == "home":
         st.subheader("🖼 이미지 분석")
 
         st.write("딸기 이미지를 업로드하여 병해충을 탐지합니다.")
+
+        st.info("정지 이미지를 빠르게 분석")
 
         if st.button(
             "이미지 업로드",
@@ -191,6 +190,8 @@ if st.session_state.page == "home":
         st.subheader("🎥 동영상 분석")
 
         st.write("딸기 동영상을 업로드하여 병해충을 탐지합니다.")
+
+        st.info("넓은 구역 병해 탐지에 추천")
 
         if st.button(
             "동영상 업로드",
