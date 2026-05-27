@@ -149,6 +149,8 @@ if st.session_state.page == "upload":
             값이 낮을수록 더 많은 병해를 탐지하지만
     오탐 가능성이 증가할 수 있습니다.
             """)
+
+    st.session_state.conf_threshold = conf_threshold
     
     st.divider()
     
@@ -202,6 +204,7 @@ elif st.session_state.page == "result":
     st.title("📊 분석 결과")
 
     uploaded_file = st.session_state.uploaded_file
+    conf_threshold = st.session_state.conf_threshold
 
     file_type = uploaded_file.type
 
@@ -359,6 +362,10 @@ elif st.session_state.page == "result":
             # -----------------------------------
     
             st.header("📊 병해충 탐지 결과")
+
+            st.info(
+    f"현재 신뢰도 임계값 (Confidence Threshold): {conf_threshold}"
+)
     
             if detection_counts == 0:
     
