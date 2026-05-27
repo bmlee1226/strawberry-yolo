@@ -152,10 +152,10 @@ if st.session_state.page == "home":
 
     st.session_state.conf_threshold = conf_threshold
 
-    st.write("원하는 분석 방식을 선택하세요.")
+    
     
     st.divider()
-    
+    st.write("원하는 분석 방식을 선택하세요.")
     colum1, colum2 = st.columns(2)
 
     # -----------------------------------
