@@ -230,7 +230,7 @@ if uploaded_file or camera_image:
                 st.subheader("탐지된 병해충이 없습니다.")
                 st.success("건강한 딸기로 보입니다 🍓")
 
-if uploaded_video_file is not None:
+elif uploaded_video_file is not None:
 
     with st.spinner("AI가 병해충을 분석중입니다..."):
         @st.cache_resource
