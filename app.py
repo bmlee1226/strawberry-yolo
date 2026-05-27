@@ -171,7 +171,7 @@ if st.session_state.page == "home":
         st.info("정지 이미지를 빠르게 분석")
 
         if st.button(
-            "이미지 업로드",
+            "이미지 분석",
             use_container_width=True
         ):
 
@@ -194,7 +194,7 @@ if st.session_state.page == "home":
         st.info("넓은 구역 병해 탐지에 추천")
 
         if st.button(
-            "동영상 업로드",
+            "동영상 분석",
             use_container_width=True
         ):
 
