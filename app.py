@@ -93,7 +93,7 @@ disease_info = {
 # -----------------------------------
 
 if "page" not in st.session_state:
-    st.session_state.page = "upload"
+    st.session_state.page = "home"
 
 if "uploaded_file" not in st.session_state:
     st.session_state.uploaded_file = None
@@ -102,7 +102,7 @@ if "uploaded_file" not in st.session_state:
 # 업로드 페이지
 # -----------------------------------
 
-if st.session_state.page == "upload":
+if st.session_state.page == "home":
     
     st.title("🍓 딸기 병해충 진단 AI")
     
@@ -151,24 +151,69 @@ if st.session_state.page == "upload":
             """)
 
     st.session_state.conf_threshold = conf_threshold
+
+    st.write("원하는 분석 방식을 선택하세요.")
+
+    st.write("이미지 분석: 정지 이미지를 빠르게 분석")
+    st.write("동영상 분석: 넓은 구역 병해 탐지에 추천")
     
     st.divider()
     
     colum1, colum2 = st.columns(2)
-    
+
+    # -----------------------------------
+    # 이미지 분석 버튼
+    # -----------------------------------
+
     with colum1:
-    
-        uploaded_file = st.file_uploader("이미지 업로드")
+
+        st.subheader("🖼 이미지 분석")
+
+        st.write("딸기 이미지를 업로드하여 병해충을 탐지합니다.")
+
+        if st.button(
+            "이미지 업로드",
+            use_container_width=True
+        ):
+
+            st.session_state.page = "image"
+
+            st.rerun()
+            
+        
+
+    # -----------------------------------
+    # 동영상 분석 버튼
+    # -----------------------------------
     
     with colum2:
+
+        st.subheader("🎥 동영상 분석")
+
+        st.write("딸기 동영상을 업로드하여 병해충을 탐지합니다.")
+
+        if st.button(
+            "동영상 업로드",
+            use_container_width=True
+        ):
+
+            st.session_state.page = "video"
+
+            st.rerun()
+
+elif st.session_state.page == "image":
+
+    st.title("🖼 이미지 병해충 분석")
+
+    colum1, colum2 = st.columns(2)
+
+    with colum1:
         
+        uploaded_file = st.file_uploader("이미지 업로드")
+
+    with colum2:
+
         camera_image = st.camera_input("사진 촬영")
-    
-    # 동영상 업로드
-    uploaded_video_file = st.file_uploader(
-        "동영상을 업로드하세요",
-        type=["mp4", "avi", "mov"]
-    )
 
     if uploaded_file:
         st.session_state.uploaded_file = uploaded_file
@@ -189,6 +234,19 @@ if st.session_state.page == "upload":
         st.session_state.page = "result"
 
         st.rerun()
+        
+# -----------------------------------
+# 동영상 분석 페이지
+# -----------------------------------
+
+elif st.session_state.page == "video":
+
+    st.title("🎥 동영상 병해충 분석")
+    # 동영상 업로드
+    uploaded_video_file = st.file_uploader(
+        "동영상을 업로드하세요",
+        type=["mp4", "avi", "mov"]
+    )
 
     elif uploaded_video_file is not None:
 
