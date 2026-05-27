@@ -208,6 +208,8 @@ elif st.session_state.page == "result":
     # 이미지인 경우
     if "image" in file_type:
 
+        image = Image.open(uploaded_file)
+
         st.image(uploaded_file)
 
         st.success("✅ 이미지 업로드 완료")
