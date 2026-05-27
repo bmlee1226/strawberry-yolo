@@ -173,6 +173,8 @@ if st.session_state.page == "upload":
     if uploaded_file:
         st.session_state.uploaded_file = uploaded_file
 
+        st.success("✅ 이미지 업로드 완료")
+
         # 결과 페이지로 이동
         st.session_state.page = "result"
 
@@ -180,6 +182,8 @@ if st.session_state.page == "upload":
 
     elif camera_image:
         st.session_state.uploaded_file = camera_image
+
+        st.success("✅ 이미지 업로드 완료")
 
         # 결과 페이지로 이동
         st.session_state.page = "result"
@@ -189,6 +193,8 @@ if st.session_state.page == "upload":
     elif uploaded_video_file is not None:
 
         st.session_state.uploaded_file = uploaded_video_file
+
+        st.success("✅ 동영상 업로드 완료")
 
         # 결과 페이지로 이동
         st.session_state.page = "result"
@@ -212,10 +218,6 @@ elif st.session_state.page == "result":
     if "image" in file_type:
 
         image = Image.open(uploaded_file)
-
-        st.image(uploaded_file)
-
-        st.success("✅ 이미지 업로드 완료")
     
         st.divider()
     
@@ -272,9 +274,7 @@ elif st.session_state.page == "result":
 
     # 동영상인 경우
     elif "video" in file_type:
-
-        st.video(uploaded_file)
-
+        
         # 임시 파일로 저장
         tfile = tempfile.NamedTemporaryFile(delete=False)
         tfile.write(uploaded_file.read())
@@ -282,8 +282,6 @@ elif st.session_state.page == "result":
         cap = cv2.VideoCapture(tfile.name)
         
         fps = cap.get(cv2.CAP_PROP_FPS)
-
-        st.success("✅ 동영상 업로드 완료")
 
         with st.spinner("AI가 병해충을 분석중입니다..."):
             @st.cache_resource
