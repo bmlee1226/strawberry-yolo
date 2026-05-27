@@ -168,7 +168,7 @@ elif uploaded_video_file is not None:
 
     # 임시 파일로 저장
     tfile = tempfile.NamedTemporaryFile(delete=False)
-    tfile.write(uploaded_file.read())
+    tfile.write(uploaded_video_file.read())
 
     st.write("임시 저장 경로:")
     st.write(tfile.name)
