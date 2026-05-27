@@ -1,12 +1,8 @@
 import streamlit as st
 from ultralytics import YOLO
 from PIL import Image
-
-@st.cache_resource
-def load_model():
-    return YOLO("best.pt")
-
-model = load_model()
+import tempfile
+import cv2
 
 st.title("🍓 딸기 병해충 진단 AI")
 
@@ -65,6 +61,12 @@ with colum1:
 with colum2:
     
     camera_image = st.camera_input("사진 촬영")
+
+# 동영상 업로드
+uploaded_vidoe_file = st.file_uploader(
+    "동영상을 업로드하세요",
+    type=["mp4", "avi", "mov"]
+)
 
 disease_info = {
     0: "잿빛곰팡이병 (gray_mold) 입니다.",
@@ -157,10 +159,38 @@ elif camera_image:
 
     image = Image.open(camera_image)
 
+elif uploaded_video_file is not None:
+
+    st.success("업로드 완료!")
+
+    # 영상 재생
+    st.video(uploaded_file)
+
+    # 임시 파일로 저장
+    tfile = tempfile.NamedTemporaryFile(delete=False)
+    tfile.write(uploaded_file.read())
+
+    st.write("임시 저장 경로:")
+    st.write(tfile.name)
+
+    cap = cv2.VideoCapture(tfile.name)
+    
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    st.write(f"FPS: {fps}")
+
+
+
 if uploaded_file or camera_image:
     st.divider()
 
     with st.spinner("AI가 병해충을 분석중입니다..."):
+
+        @st.cache_resource
+        def load_model():
+            return YOLO("best.pt")
+        
+        model = load_model()
+        
         results = model(image, conf=conf_threshold)
 
         plotted = results[0].plot()
@@ -203,6 +233,75 @@ if uploaded_file or camera_image:
             with col2:
                 st.subheader("탐지된 병해충이 없습니다.")
                 st.success("건강한 딸기로 보입니다 🍓")
+
+if uploaded_video_file is not None:
+
+    with st.spinner("AI가 병해충을 분석중입니다..."):
+        @st.cache_resource
+        def load_model():
+            return YOLO("best.pt")
+        
+        model = load_model()
+
+        frame_count = 0
+        saved_count = 0
+
+        while True:
+            ret, frame = cap.read()
+        
+            if not ret:
+                break
+        
+            # 1초마다 1프레임 저장
+            if frame_count % int(fps) == 0:
+        
+                results = model(frame, conf=conf_threshold)
+        
+                plotted = results[0].plot()
+        
+                col1, col2 = st.columns(2)
+            
+                with col1:
+                    st.image(plotted)
+            
+                if len(results[0].boxes) > 0:
+            
+                    best_idx = results[0].boxes.conf.argmax()
+                
+                    class_id = int(results[0].boxes.cls[best_idx])
+                
+                    conf = float(results[0].boxes.conf[best_idx])
+            
+                    info = disease_info[class_id]
+                    
+                    with col2:
+                        st.subheader(info["explain"])
+            
+                        confidence = float(conf)
+                        st.progress(confidence)
+                        st.write(f"신뢰도: {conf:.2f}")
+            
+                    with st.container(border=True):
+                    # with st.expander("🎯 병해 상세 정보"):
+                        st.write(info["symptom"])
+                    
+                        st.write(info["cause"])
+            
+                        st.write(info["solution"])
+            
+                        st.write("🍓 병해 예시 이미지")
+                        st.image(info["image"])
+                        st.caption(info["name"])
+                
+                else:
+                    with col2:
+                        st.subheader("탐지된 병해충이 없습니다.")
+                        st.success("건강한 딸기로 보입니다 🍓")
+
+            frame_count += 1
+        
+        
+
 
 st.markdown("---")
 
