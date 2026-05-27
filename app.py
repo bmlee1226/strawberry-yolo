@@ -63,7 +63,7 @@ with colum2:
     camera_image = st.camera_input("사진 촬영")
 
 # 동영상 업로드
-uploaded_vidoe_file = st.file_uploader(
+uploaded_video_file = st.file_uploader(
     "동영상을 업로드하세요",
     type=["mp4", "avi", "mov"]
 )
