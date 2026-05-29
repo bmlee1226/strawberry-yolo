@@ -89,6 +89,23 @@ disease_info = {
     }
 }
 
+def show_disease_info(class_id):
+
+    info = disease_info[class_id]
+
+    st.header(f"🩺 {info['name']}  병해충 정보")
+
+    with st.container(border=True):
+
+        st.write(info["symptom"])
+        st.write(info["cause"])
+        st.write(info["solution"])
+
+        st.write("🍓 병해 예시 이미지")
+
+        st.image(info["image"])
+
+        st.caption(info["name"])
 
 # -----------------------------------
 # session_state 초기화
@@ -408,63 +425,51 @@ elif st.session_state.page == "result":
 
     file_type = uploaded_file.type
 
+    with st.spinner("AI가 병해충을 분석중입니다..."):
+
+        @st.cache_resource
+        def load_model():
+            return YOLO("best.pt")
+        
+        model = load_model()
+
     # 이미지인 경우
     if "image" in file_type:
 
         image = Image.open(uploaded_file)
     
         st.divider()
+        
+        results = model(image, conf=conf_threshold)
+
+        plotted = results[0].plot()
     
-        with st.spinner("AI가 병해충을 분석중입니다..."):
+        col1, col2 = st.columns(2)
     
-            @st.cache_resource
-            def load_model():
-                return YOLO("best.pt")
-            
-            model = load_model()
-            
-            results = model(image, conf=conf_threshold)
+        with col1:
+            st.image(plotted)
     
-            plotted = results[0].plot()
+        if len(results[0].boxes) > 0:
+    
+            best_idx = results[0].boxes.conf.argmax()
         
-            col1, col2 = st.columns(2)
+            class_id = int(results[0].boxes.cls[best_idx])
         
-            with col1:
-                st.image(plotted)
+            conf = float(results[0].boxes.conf[best_idx])
+
+            with col2:
+                st.subheader(info["explain"])
+    
+                confidence = float(conf)
+                st.progress(confidence)
+                st.write(f"신뢰도: {conf:.2f}")
+
+            show_disease_info(class_id)
         
-            if len(results[0].boxes) > 0:
-        
-                best_idx = results[0].boxes.conf.argmax()
-            
-                class_id = int(results[0].boxes.cls[best_idx])
-            
-                conf = float(results[0].boxes.conf[best_idx])
-        
-                info = disease_info[class_id]
-                
-                with col2:
-                    st.subheader(info["explain"])
-        
-                    confidence = float(conf)
-                    st.progress(confidence)
-                    st.write(f"신뢰도: {conf:.2f}")
-        
-                with st.container(border=True):
-                # with st.expander("🎯 병해 상세 정보"):
-                    st.write(info["symptom"])
-                
-                    st.write(info["cause"])
-        
-                    st.write(info["solution"])
-        
-                    st.write("🍓 병해 예시 이미지")
-                    st.image(info["image"])
-                    st.caption(info["name"])
-            
-            else:
-                with col2:
-                    st.subheader("탐지된 병해충이 없습니다.")
-                    st.success("건강한 딸기로 보입니다 🍓")
+        else:
+            with col2:
+                st.subheader("탐지된 병해충이 없습니다.")
+                st.success("건강한 딸기로 보입니다 🍓")
 
     # 동영상인 경우
     elif "video" in file_type:
@@ -481,108 +486,88 @@ elif st.session_state.page == "result":
                 cap.get(cv2.CAP_PROP_FRAME_COUNT)
             )
 
-            
-            with st.spinner("AI가 병해충을 분석중입니다..."):
-                @st.cache_resource
-                def load_model():
-                    return YOLO("best.pt")
-                
-                model = load_model()
-        
-                frame_count = 0
-                saved_count = 0
-        
-                detection_counts = 0
-        
-                detected_classes = set()
-                
-                progress_bar = st.progress(0)
-
-                while True:
-                    ret, frame = cap.read()
-                
-                    if not ret:
-                        break
-        
-                    # 진행률 표시
-                    progress = min(frame_count / total_frames, 1.0)
-        
-                    progress_bar.progress(progress)
-        
-                
-                    # 1초마다 1프레임 저장
-                    if frame_count % int(fps) == 0:
-                
-                        results = model(frame, conf=conf_threshold)
-        
-                        plotted = results[0].plot()
-                
-                        col1, col2 = st.columns(2)
-                    
-                        with col1:
-                            st.image(plotted)
-                    
-                        if len(results[0].boxes) > 0:
-        
-                            detection_counts += 1
-                    
-                            best_idx = results[0].boxes.conf.argmax()
-                        
-                            class_id = int(results[0].boxes.cls[best_idx])
-        
-                            info = disease_info[class_id]
-        
-                            detected_classes.add(class_id)
-                        
-                            conf = float(results[0].boxes.conf[best_idx])
-                            
-                            with col2:
-                                st.subheader(info["explain"])
-                    
-                                confidence = float(conf)
-                                st.progress(confidence)
-                                st.write(f"신뢰도: {conf:.2f}")
-        
-                        else:
-                            with col2:
-                                st.subheader("탐지된 병해충이 없습니다.")
-                                st.success("건강한 딸기로 보입니다 🍓")
-        
-                    frame_count += 1
-        
-                progress_bar.empty()
-        
-                # -----------------------------------
-                # 결과 출력
-                # -----------------------------------
-        
-                st.header("📊 병해충 탐지 결과")
     
-                st.info(
-        f"현재 신뢰도 임계값 (Confidence Threshold): {conf_threshold}"
-    )
-        
-                if detection_counts == 0:
-        
-                    st.success("✅ 병해충이 탐지되지 않았습니다.")
-        
-                else:
-                    for class_id in detected_classes:
-        
+            frame_count = 0
+            saved_count = 0
+    
+            detection_counts = 0
+    
+            detected_classes = set()
+            
+            progress_bar = st.progress(0)
+
+            while True:
+                ret, frame = cap.read()
+            
+                if not ret:
+                    break
+    
+                # 진행률 표시
+                progress = min(frame_count / total_frames, 1.0)
+    
+                progress_bar.progress(progress)
+    
+            
+                # 1초마다 1프레임 저장
+                if frame_count % int(fps) == 0:
+            
+                    results = model(frame, conf=conf_threshold)
+    
+                    plotted = results[0].plot()
+            
+                    col1, col2 = st.columns(2)
+                
+                    with col1:
+                        st.image(plotted)
+                
+                    if len(results[0].boxes) > 0:
+    
+                        detection_counts += 1
+                
+                        best_idx = results[0].boxes.conf.argmax()
+                    
+                        class_id = int(results[0].boxes.cls[best_idx])
+    
                         info = disease_info[class_id]
-                        st.header(f"🩺 {info["name"]} 병해충 정보")
-        
-                        with st.container(border=True):
-                            # with st.expander("🎯 병해 상세 정보"):
-                                st.write(info["symptom"])
-                            
-                                st.write(info["cause"])
+    
+                        detected_classes.add(class_id)
                     
-                                st.write(info["solution"])
+                        conf = float(results[0].boxes.conf[best_idx])
+                        
+                        with col2:
+                            st.subheader(info["explain"])
+                
+                            confidence = float(conf)
+                            st.progress(confidence)
+                            st.write(f"신뢰도: {conf:.2f}")
+    
+                    else:
+                        with col2:
+                            st.subheader("탐지된 병해충이 없습니다.")
+                            st.success("건강한 딸기로 보입니다 🍓")
+
+                frame_count += 1
+    
+            progress_bar.empty()
+    
+            # -----------------------------------
+            # 결과 출력
+            # -----------------------------------
+    
+            st.header("📊 병해충 탐지 결과")
+
+            st.info(
+    f"현재 신뢰도 임계값 (Confidence Threshold): {conf_threshold}"
+)
+    
+            if detection_counts == 0:
+    
+                st.success("✅ 병해충이 탐지되지 않았습니다.")
+    
+            else:
+                for class_id in detected_classes:
+                    show_disease_info(class_id)
                     
-                                st.write("🍓 병해 예시 이미지")
-                                st.image(info["image"])
-                                st.caption(info["name"])
         elif st.session_state.analysis_type == "precise":
 
             video_path = st.session_state.video_path
@@ -614,13 +599,6 @@ elif st.session_state.page == "result":
                 (width, height)
             )
     
-            with st.spinner("AI가 병해충을 분석중입니다..."):
-                @st.cache_resource
-                def load_model():
-                    return YOLO("best.pt")
-                
-                model = load_model()
-        
             # -----------------------------
             # 진행률 표시
             # -----------------------------
@@ -762,21 +740,7 @@ elif st.session_state.page == "result":
     
             else:
                 for class_id in detected_classes:
-    
-                    info = disease_info[class_id]
-                    st.header(f"🩺 {info["name"]} 병해충 정보")
-    
-                    with st.container(border=True):
-                        # with st.expander("🎯 병해 상세 정보"):
-                            st.write(info["symptom"])
-                        
-                            st.write(info["cause"])
-                
-                            st.write(info["solution"])
-                
-                            st.write("🍓 병해 예시 이미지")
-                            st.image(info["image"])
-                            st.caption(info["name"])
+                    show_disease_info(class_id)
 
     if st.button("🔙 처음으로"):
 
