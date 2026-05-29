@@ -253,7 +253,7 @@ elif st.session_state.page == "video":
 
         video_bytes = uploaded_video_file.read()
         # session_state 저장
-        st.session_state["video_bytes"] = video_bytes
+        st.session_state.video_bytes = video_bytes
 
         st.session_state.uploaded_file = uploaded_video_file
 
@@ -469,7 +469,7 @@ elif st.session_state.page == "result":
     elif "video" in file_type:
 
         if st.session_state.analysis_type == "fast":
-            video_bytes = st.session_state["video_bytes"]
+            video_bytes = st.session_state.video_bytes
 
             tfile = tempfile.NamedTemporaryFile(
                 delete=False,
@@ -596,7 +596,7 @@ elif st.session_state.page == "result":
                                 st.caption(info["name"])
         elif st.session_state.analysis_type == "precise":
 
-            video_bytes = st.session_state["video_bytes"]
+            video_bytes = st.session_state.video_bytes
 
             tfile = tempfile.NamedTemporaryFile(
                 delete=False,
