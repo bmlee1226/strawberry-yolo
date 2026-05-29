@@ -498,7 +498,7 @@ elif st.session_state.page == "result":
                 st.write(total_frames)
 
                 while True:
-                    ret, frame = cap2.read()
+                    ret, frame = cap.read()
 
                     st.write(frame)
                 
