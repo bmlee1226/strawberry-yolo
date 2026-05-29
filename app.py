@@ -251,6 +251,10 @@ elif st.session_state.page == "video":
 
     if uploaded_video_file is not None:
 
+        video_bytes = uploaded_video_file.read()
+        # session_state 저장
+        st.session_state["video_bytes"] = video_bytes
+
         st.session_state.uploaded_file = uploaded_video_file
 
         st.success("✅ 동영상 업로드 완료")
@@ -263,7 +267,7 @@ elif st.session_state.page == "video":
             suffix=".mp4"
         )
     
-        tfile.write(uploaded_video_file.read())
+        tfile.write(video_bytes)
     
         video_path = tfile.name
     
@@ -288,7 +292,7 @@ elif st.session_state.page == "video":
         # -----------------------------
         # 영상 정보 표시
         # -----------------------------
-        st.video(video_path)
+        st.video(video_bytes)
     
         st.subheader("영상 정보")
     
@@ -358,11 +362,6 @@ elif st.session_state.page == "video":
                 # 결과 페이지로 이동
                 st.session_state.page = "result"
                 st.session_state.analysis_type = "fast"
-                st.session_state.cap = cap
-                st.session_state.fps = fps
-                st.session_state.width = width
-                st.session_state.height = height
-                st.session_state.total_frames = total_frames
         
                 st.rerun()
     
@@ -392,11 +391,6 @@ elif st.session_state.page == "video":
                 # 결과 페이지로 이동
                 st.session_state.page = "result"
                 st.session_state.analysis_type = "precise"
-                st.session_state.cap = cap
-                st.session_state.fps = fps
-                st.session_state.width = width
-                st.session_state.height = height
-                st.session_state.total_frames = total_frames
         
                 st.rerun()
 
@@ -475,10 +469,26 @@ elif st.session_state.page == "result":
     elif "video" in file_type:
 
         if st.session_state.analysis_type == "fast":
-            cap = st.session_state.cap
-            fps = st.session_state.fps
-            total_frames = st.session_state.total_frames
-    
+            video_bytes = st.session_state["video_bytes"]
+
+            tfile = tempfile.NamedTemporaryFile(
+                delete=False,
+                suffix=".mp4"
+            )
+        
+            tfile.write(video_bytes)
+        
+            video_path = tfile.name
+
+            cap = cv2.VideoCapture(video_path)
+        
+            fps = cap.get(cv2.CAP_PROP_FPS)
+        
+            total_frames = int(
+                cap.get(cv2.CAP_PROP_FRAME_COUNT)
+            )
+
+            
             with st.spinner("AI가 병해충을 분석중입니다..."):
                 @st.cache_resource
                 def load_model():
@@ -586,12 +596,25 @@ elif st.session_state.page == "result":
                                 st.caption(info["name"])
         elif st.session_state.analysis_type == "precise":
 
-            cap = st.session_state.cap
-            fps = st.session_state.fps
-            width = st.session_state.width
-            height = st.session_state.height
-            total_frames = st.session_state.total_frames
-    
+            video_bytes = st.session_state["video_bytes"]
+
+            tfile = tempfile.NamedTemporaryFile(
+                delete=False,
+                suffix=".mp4"
+            )
+        
+            tfile.write(video_bytes)
+        
+            video_path = tfile.name
+
+            cap = cv2.VideoCapture(video_path)
+        
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            total_frames = int(
+                cap.get(cv2.CAP_PROP_FRAME_COUNT)
+            )
             # fps 오류 방지
             if fps == 0:
                 fps = 30
