@@ -153,13 +153,6 @@ if st.session_state.page == "home":
             """)
 
     st.session_state.conf_threshold = conf_threshold
-
-    tab1, tab2, tab3, tab4 = st.tabs([
-    "이미지 분석",
-    "영상 빠른 분석",
-    "영상 정밀 분석",
-    "실시간 분석"
-])
     
     st.divider()
     st.write("원하는 분석 방식을 선택하세요.")
@@ -261,11 +254,139 @@ elif st.session_state.page == "video":
         st.session_state.uploaded_file = uploaded_video_file
 
         st.success("✅ 동영상 업로드 완료")
+    
+        # -----------------------------
+        # 임시 저장
+        # -----------------------------
+        tfile = tempfile.NamedTemporaryFile(
+            delete=False,
+            suffix=".mp4"
+        )
+    
+        tfile.write(uploaded_file.read())
+    
+        video_path = tfile.name
+    
+        # -----------------------------
+        # 영상 정보 읽기
+        # -----------------------------
+        cap = cv2.VideoCapture(video_path)
+    
+        fps = cap.get(cv2.CAP_PROP_FPS)
+    
+        if fps == 0:
+            fps = 30
+    
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+        duration_sec = total_frames / fps
+    
+        cap.release()
+    
+        # -----------------------------
+        # 영상 정보 표시
+        # -----------------------------
+        st.video(video_path)
+    
+        st.subheader("영상 정보")
+    
+        col1, col2, col3 = st.columns(3)
+    
+        with col1:
+            st.metric("FPS", f"{fps:.1f}")
+    
+        with col2:
+            st.metric("총 프레임", total_frames)
+    
+        with col3:
+            st.metric("영상 길이", f"{duration_sec:.1f}초")
+    
+        # -----------------------------
+        # 예상 소요 시간 계산
+        # -----------------------------
+        # 예시 기준:
+        # 빠른 분석 = 1초당 1프레임
+        # 정밀 분석 = 모든 프레임
+    
+        fast_analysis_frames = int(duration_sec)
+    
+        precise_analysis_frames = total_frames
+    
+        # 대략적인 처리 속도 가정
+        # GPU/모델에 따라 수정 가능
+    
+        FAST_FPS = 15
+        PRECISE_FPS = 5
+    
+        fast_estimated_time = fast_analysis_frames / FAST_FPS
+    
+        precise_estimated_time = (
+            precise_analysis_frames / PRECISE_FPS
+        )
+    
+        # -----------------------------
+        # 분석 방식 선택 UI
+        # -----------------------------
+        st.subheader("분석 방식 선택")
+    
+        col1, col2 = st.columns(2)
+    
+        # -----------------------------
+        # 빠른 분석
+        # -----------------------------
+        with col1:
+    
+            st.info(
+                f"""
+                빠른 분석
+                
+                • 1초당 1프레임 분석
+                • 긴 영상 빠른 확인용
+                • 예상 시간: {fast_estimated_time:.1f}초
+                """
+            )
+    
+            if st.button(
+                "빠른 분석 시작",
+                use_container_width=True
+            ):
+    
+                st.success("빠른 분석 시작!")
 
-        # 결과 페이지로 이동
-        st.session_state.page = "result"
+                # 결과 페이지로 이동
+                st.session_state.page = "result"
+                st.session_state.analysis_type = "fast"
+        
+                st.rerun()
+    
+        # -----------------------------
+        # 정밀 분석
+        # -----------------------------
+        with col2:
+    
+            st.warning(
+                f"""
+                정밀 분석
+                
+                • 모든 프레임 분석
+                • 가장 정확한 결과
+                • 결과 mp4 생성
+                • 예상 시간: {precise_estimated_time:.1f}초
+                """
+            )
+    
+            if st.button(
+                "정밀 분석 시작",
+                use_container_width=True
+            ):
+    
+                st.success("정밀 분석 시작!")
 
-        st.rerun()
+                # 결과 페이지로 이동
+                st.session_state.page = "result"
+                st.session_state.analysis_type = "precise"
+        
+                st.rerun()
 
 # -----------------------------------
 # 결과 페이지
@@ -340,264 +461,264 @@ elif st.session_state.page == "result":
 
     # 동영상인 경우
     elif "video" in file_type:
+
+        if st.session_state.analysis_type == "fast":
+            # 임시 파일로 저장
+            tfile = tempfile.NamedTemporaryFile(delete=False)
+            tfile.write(uploaded_file.read())
         
-        # 임시 파일로 저장
-        tfile = tempfile.NamedTemporaryFile(delete=False)
-        tfile.write(uploaded_file.read())
-    
-        cap = cv2.VideoCapture(tfile.name)
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fps = cap.get(cv2.CAP_PROP_FPS)
-        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
-        # fps 오류 방지
-        if fps == 0:
-            fps = 30
-
-        # -----------------------------
-        # 결과 영상 저장 경로
-        # -----------------------------
-
-        temp_output = "temp_result.mp4"
-    
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    
-        out = cv2.VideoWriter(
-            temp_output,
-            fourcc,
-            fps,
-            (width, height)
-        )
-
-        with st.spinner("AI가 병해충을 분석중입니다..."):
-            @st.cache_resource
-            def load_model():
-                return YOLO("best.pt")
+            cap = cv2.VideoCapture(tfile.name)
             
-            model = load_model()
+            fps = cap.get(cv2.CAP_PROP_FPS)
     
-        # -----------------------------
-        # 진행률 표시
-        # -----------------------------
-        progress_bar = st.progress(0)
-
-        start_time = time.time()
-
-        status_text = st.empty()
-
-        preview_frame = st.empty()
-
-        frame_idx = 0
-    
-        # -----------------------------
-        # 프레임 처리
-        # -----------------------------
-        while cap.isOpened():
-            ret, frame = cap.read()
-    
-            if not ret:
-                break
-
-            # YOLO 추론
-            results = model(frame)
-
-            # bbox 그려진 결과 프레임
-            annotated_frame = results[0].plot()
-
-            # 저장
-            out.write(annotated_frame)
-
-            frame_idx += 1
-    
-            progress = int(frame_idx / total_frames * 100)
-            progress_bar.progress(progress)
-        
-            # -----------------------------
-            # 시간 계산
-            # -----------------------------
-            elapsed_time = time.time() - start_time
-        
-            fps_processing = frame_idx / elapsed_time
-        
-            remaining_frames = total_frames - frame_idx
-        
-            remaining_time = remaining_frames / fps_processing
-        
-            # -----------------------------
-            # 상태 표시
-            # -----------------------------
-            status_text.text(
-                f"""
-                처리 프레임: {frame_idx}/{total_frames}
-                처리 FPS: {fps_processing:.2f}
-                경과 시간: {elapsed_time:.1f}초
-                남은 예상 시간: {remaining_time:.1f}초
-                """
-            )
-
-            preview_frame.image(
-                annotated_frame,
-                channels="BGR"
-            )
-        # 종료
-        cap.release()
-        out.release()
-    
-        st.success("분석 완료!")
-    
-        # -----------------------------
-        # H.264 변환
-        # -----------------------------
-        final_output = "final_result.mp4"
-    
-        command = [
-            "ffmpeg",
-            "-y",
-            "-i",
-            temp_output,
-            "-vcodec",
-            "libx264",
-            "-acodec",
-            "aac",
-            final_output
-        ]
-    
-        subprocess.run(command)
-    
-        st.success("영상 생성 완료!")    
-
-    
-        # -----------------------------
-        # 결과 영상 표시
-        # -----------------------------
-        st.video(final_output)
-    
-        # -----------------------------
-        # 다운로드 버튼
-        # -----------------------------
-        with open(final_output, "rb") as file:
-            st.download_button(
-                label="결과 영상 다운로드",
-                data=file,
-                file_name="result.mp4",
-                mime="video/mp4"
-            )
-    
-#     # 동영상인 경우
-#     elif "video" in file_type:
-        
-#         # 임시 파일로 저장
-#         tfile = tempfile.NamedTemporaryFile(delete=False)
-#         tfile.write(uploaded_file.read())
-    
-#         cap = cv2.VideoCapture(tfile.name)
-        
-#         fps = cap.get(cv2.CAP_PROP_FPS)
-
-#         with st.spinner("AI가 병해충을 분석중입니다..."):
-#             @st.cache_resource
-#             def load_model():
-#                 return YOLO("best.pt")
-            
-#             model = load_model()
-    
-#             frame_count = 0
-#             saved_count = 0
-    
-#             detection_counts = 0
-    
-#             detected_classes = set()
-            
-#             progress_bar = st.progress(0)
-    
-#             total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    
-#             while True:
-#                 ret, frame = cap.read()
-            
-#                 if not ret:
-#                     break
-    
-#                 # 진행률 표시
-#                 progress = min(frame_count / total_frames, 1.0)
-    
-#                 progress_bar.progress(progress)
-    
-            
-#                 # 1초마다 1프레임 저장
-#                 if frame_count % int(fps) == 0:
-            
-#                     results = model(frame, conf=conf_threshold)
-    
-#                     plotted = results[0].plot()
-            
-#                     col1, col2 = st.columns(2)
+            with st.spinner("AI가 병해충을 분석중입니다..."):
+                @st.cache_resource
+                def load_model():
+                    return YOLO("best.pt")
                 
-#                     with col1:
-#                         st.image(plotted)
+                model = load_model()
+        
+                frame_count = 0
+                saved_count = 0
+        
+                detection_counts = 0
+        
+                detected_classes = set()
                 
-#                     if len(results[0].boxes) > 0:
-    
-#                         detection_counts += 1
+                progress_bar = st.progress(0)
+        
+                total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        
+                while True:
+                    ret, frame = cap.read()
                 
-#                         best_idx = results[0].boxes.conf.argmax()
+                    if not ret:
+                        break
+        
+                    # 진행률 표시
+                    progress = min(frame_count / total_frames, 1.0)
+        
+                    progress_bar.progress(progress)
+        
+                
+                    # 1초마다 1프레임 저장
+                    if frame_count % int(fps) == 0:
+                
+                        results = model(frame, conf=conf_threshold)
+        
+                        plotted = results[0].plot()
+                
+                        col1, col2 = st.columns(2)
                     
-#                         class_id = int(results[0].boxes.cls[best_idx])
-    
-#                         info = disease_info[class_id]
-    
-#                         detected_classes.add(class_id)
+                        with col1:
+                            st.image(plotted)
                     
-#                         conf = float(results[0].boxes.conf[best_idx])
+                        if len(results[0].boxes) > 0:
+        
+                            detection_counts += 1
+                    
+                            best_idx = results[0].boxes.conf.argmax()
                         
-#                         with col2:
-#                             st.subheader(info["explain"])
-                
-#                             confidence = float(conf)
-#                             st.progress(confidence)
-#                             st.write(f"신뢰도: {conf:.2f}")
-    
-#                     else:
-#                         with col2:
-#                             st.subheader("탐지된 병해충이 없습니다.")
-#                             st.success("건강한 딸기로 보입니다 🍓")
-    
-#                 frame_count += 1
-    
-#             progress_bar.empty()
-    
-#             # -----------------------------------
-#             # 결과 출력
-#             # -----------------------------------
-    
-#             st.header("📊 병해충 탐지 결과")
-
-#             st.info(
-#     f"현재 신뢰도 임계값 (Confidence Threshold): {conf_threshold}"
-# )
-    
-#             if detection_counts == 0:
-    
-#                 st.success("✅ 병해충이 탐지되지 않았습니다.")
-    
-#             else:
-#                 for class_id in detected_classes:
-    
-#                     info = disease_info[class_id]
-#                     st.header(f"🩺 {info["name"]} 병해충 정보")
-    
-#                     with st.container(border=True):
-#                         # with st.expander("🎯 병해 상세 정보"):
-#                             st.write(info["symptom"])
+                            class_id = int(results[0].boxes.cls[best_idx])
+        
+                            info = disease_info[class_id]
+        
+                            detected_classes.add(class_id)
                         
-#                             st.write(info["cause"])
+                            conf = float(results[0].boxes.conf[best_idx])
+                            
+                            with col2:
+                                st.subheader(info["explain"])
+                    
+                                confidence = float(conf)
+                                st.progress(confidence)
+                                st.write(f"신뢰도: {conf:.2f}")
+        
+                        else:
+                            with col2:
+                                st.subheader("탐지된 병해충이 없습니다.")
+                                st.success("건강한 딸기로 보입니다 🍓")
+        
+                    frame_count += 1
+        
+                progress_bar.empty()
+        
+                # -----------------------------------
+                # 결과 출력
+                # -----------------------------------
+        
+                st.header("📊 병해충 탐지 결과")
+    
+                st.info(
+        f"현재 신뢰도 임계값 (Confidence Threshold): {conf_threshold}"
+    )
+        
+                if detection_counts == 0:
+        
+                    st.success("✅ 병해충이 탐지되지 않았습니다.")
+        
+                else:
+                    for class_id in detected_classes:
+        
+                        info = disease_info[class_id]
+                        st.header(f"🩺 {info["name"]} 병해충 정보")
+        
+                        with st.container(border=True):
+                            # with st.expander("🎯 병해 상세 정보"):
+                                st.write(info["symptom"])
+                            
+                                st.write(info["cause"])
+                    
+                                st.write(info["solution"])
+                    
+                                st.write("🍓 병해 예시 이미지")
+                                st.image(info["image"])
+                                st.caption(info["name"])
+        elif st.session_state.analysis_type = "precise":
+            
+            # 임시 파일로 저장
+            tfile = tempfile.NamedTemporaryFile(delete=False)
+            tfile.write(uploaded_file.read())
+        
+            cap = cv2.VideoCapture(tfile.name)
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            fps = cap.get(cv2.CAP_PROP_FPS)
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+            # fps 오류 방지
+            if fps == 0:
+                fps = 30
+    
+            # -----------------------------
+            # 결과 영상 저장 경로
+            # -----------------------------
+    
+            temp_output = "temp_result.mp4"
+        
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        
+            out = cv2.VideoWriter(
+                temp_output,
+                fourcc,
+                fps,
+                (width, height)
+            )
+    
+            with st.spinner("AI가 병해충을 분석중입니다..."):
+                @st.cache_resource
+                def load_model():
+                    return YOLO("best.pt")
                 
-#                             st.write(info["solution"])
-                
-#                             st.write("🍓 병해 예시 이미지")
-#                             st.image(info["image"])
-#                             st.caption(info["name"])
+                model = load_model()
+        
+            # -----------------------------
+            # 진행률 표시
+            # -----------------------------
+            progress_bar = st.progress(0)
+    
+            start_time = time.time()
+    
+            status_text = st.empty()
+    
+            preview_frame = st.empty()
+    
+            frame_idx = 0
+        
+            # -----------------------------
+            # 프레임 처리
+            # -----------------------------
+            while cap.isOpened():
+                ret, frame = cap.read()
+        
+                if not ret:
+                    break
+    
+                # YOLO 추론
+                results = model(frame)
+    
+                # bbox 그려진 결과 프레임
+                annotated_frame = results[0].plot()
+    
+                # 저장
+                out.write(annotated_frame)
+    
+                frame_idx += 1
+        
+                progress = int(frame_idx / total_frames * 100)
+                progress_bar.progress(progress)
+            
+                # -----------------------------
+                # 시간 계산
+                # -----------------------------
+                elapsed_time = time.time() - start_time
+            
+                fps_processing = frame_idx / elapsed_time
+            
+                remaining_frames = total_frames - frame_idx
+            
+                remaining_time = remaining_frames / fps_processing
+            
+                # -----------------------------
+                # 상태 표시
+                # -----------------------------
+                status_text.text(
+                    f"""
+                    처리 프레임: {frame_idx}/{total_frames}
+                    처리 FPS: {fps_processing:.2f}
+                    경과 시간: {elapsed_time:.1f}초
+                    남은 예상 시간: {remaining_time:.1f}초
+                    """
+                )
+    
+                preview_frame.image(
+                    annotated_frame,
+                    channels="BGR"
+                )
+            # 종료
+            cap.release()
+            out.release()
+        
+            st.success("분석 완료!")
+        
+            # -----------------------------
+            # H.264 변환
+            # -----------------------------
+            final_output = "final_result.mp4"
+        
+            command = [
+                "ffmpeg",
+                "-y",
+                "-i",
+                temp_output,
+                "-vcodec",
+                "libx264",
+                "-acodec",
+                "aac",
+                final_output
+            ]
+        
+            subprocess.run(command)
+        
+            st.success("영상 생성 완료!")    
+    
+        
+            # -----------------------------
+            # 결과 영상 표시
+            # -----------------------------
+            st.video(final_output)
+        
+            # -----------------------------
+            # 다운로드 버튼
+            # -----------------------------
+            with open(final_output, "rb") as file:
+                st.download_button(
+                    label="결과 영상 다운로드",
+                    data=file,
+                    file_name="result.mp4",
+                    mime="video/mp4"
+                )
+        
 
     if st.button("🔙 처음으로"):
 
