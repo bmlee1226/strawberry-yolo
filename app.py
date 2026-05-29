@@ -4,6 +4,7 @@ from PIL import Image
 import tempfile
 import cv2
 import subprocess
+import time
 
 
 disease_info = {
@@ -376,6 +377,10 @@ elif st.session_state.page == "result":
         # -----------------------------
         progress_bar = st.progress(0)
 
+        start_time = time.time()
+
+        status_text = st.empty()
+
         frame_idx = 0
     
         # -----------------------------
@@ -400,7 +405,29 @@ elif st.session_state.page == "result":
     
             progress = int(frame_idx / total_frames * 100)
             progress_bar.progress(progress)
-    
+        
+            # -----------------------------
+            # 시간 계산
+            # -----------------------------
+            elapsed_time = time.time() - start_time
+        
+            fps_processing = frame_idx / elapsed_time
+        
+            remaining_frames = total_frames - frame_idx
+        
+            remaining_time = remaining_frames / fps_processing
+        
+            # -----------------------------
+            # 상태 표시
+            # -----------------------------
+            status_text.text(
+                f"""
+                처리 프레임: {frame_idx}/{total_frames}
+                처리 FPS: {fps_processing:.2f}
+                경과 시간: {elapsed_time:.1f}초
+                남은 예상 시간: {remaining_time:.1f}초
+                """
+            )
         # 종료
         cap.release()
         out.release()
