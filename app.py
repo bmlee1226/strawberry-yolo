@@ -140,6 +140,37 @@ def show_detection_result(results):
 
     return class_id, detection
 
+
+def get_video_info(video_path):
+
+    cap = cv2.VideoCapture(video_path)
+
+    fps = cap.get(cv2.CAP_PROP_FPS)
+
+    if fps == 0:
+        fps = 30
+
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    total_frames = int(
+        cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    )
+
+    duration = total_frames / fps
+
+    cap.release()
+
+    return {
+        "fps": fps,
+        "width": width,
+        "height": height,
+        "total_frames": total_frames,
+        "duration": duration
+    }
+
+
 # -----------------------------------
 # session_state 초기화
 # -----------------------------------
@@ -325,20 +356,8 @@ elif st.session_state.page == "video":
         # -----------------------------
         # 영상 정보 읽기
         # -----------------------------
-        cap = cv2.VideoCapture(video_path)
-    
-        fps = cap.get(cv2.CAP_PROP_FPS)
-    
-        if fps == 0:
-            fps = 30
 
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    
-        duration_sec = total_frames / fps
-    
-        cap.release()
+        video_info_dic = get_video_info(video_path)
     
         # -----------------------------
         # 영상 정보 표시
@@ -350,13 +369,13 @@ elif st.session_state.page == "video":
         col1, col2, col3 = st.columns(3)
     
         with col1:
-            st.metric("FPS", f"{fps:.1f}")
+            st.metric("FPS", f"{video_info_dic["fps"]:.1f}")
     
         with col2:
-            st.metric("총 프레임", total_frames)
+            st.metric("총 프레임", video_info_dic["total_frames"])
     
         with col3:
-            st.metric("영상 길이", f"{duration_sec:.1f}초")
+            st.metric("영상 길이", f"{video_info_dic["duration"]:.1f}초")
     
         # -----------------------------
         # 예상 소요 시간 계산
@@ -365,9 +384,9 @@ elif st.session_state.page == "video":
         # 빠른 분석 = 1초당 1프레임
         # 정밀 분석 = 모든 프레임
     
-        fast_analysis_frames = int(duration_sec)
+        fast_analysis_frames = int(video_info_dic["duration"])
     
-        precise_analysis_frames = total_frames
+        precise_analysis_frames = video_info_dic["total_frames"]
     
         # 대략적인 처리 속도 가정
         # GPU/모델에 따라 수정 가능
@@ -487,14 +506,9 @@ elif st.session_state.page == "result":
 
             video_path = st.session_state.video_path
 
-            cap = cv2.VideoCapture(video_path)
-        
-            fps = cap.get(cv2.CAP_PROP_FPS)
-        
-            total_frames = int(
-                cap.get(cv2.CAP_PROP_FRAME_COUNT)
-            )
+            video_info_dic = get_video_info(video_path)
 
+            cap = cv2.VideoCapture(video_path)
     
             frame_count = 0
             saved_count = 0
@@ -512,13 +526,13 @@ elif st.session_state.page == "result":
                     break
     
                 # 진행률 표시
-                progress = min(frame_count / total_frames, 1.0)
+                progress = min(frame_count / video_info_dic["total_frames"], 1.0)
     
                 progress_bar.progress(progress)
     
             
                 # 1초마다 1프레임 저장
-                if frame_count % int(fps) == 0:
+                if frame_count % int(video_info_dic["fps"]) == 0:
             
                     results = model(frame, conf=conf_threshold)
 
@@ -554,17 +568,9 @@ elif st.session_state.page == "result":
 
             video_path = st.session_state.video_path
 
+            video_info_dic = get_video_info(video_path)
+
             cap = cv2.VideoCapture(video_path)
-        
-            fps = cap.get(cv2.CAP_PROP_FPS)
-            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            total_frames = int(
-                cap.get(cv2.CAP_PROP_FRAME_COUNT)
-            )
-            # fps 오류 방지
-            if fps == 0:
-                fps = 30
     
             # -----------------------------
             # 결과 영상 저장 경로
@@ -577,8 +583,8 @@ elif st.session_state.page == "result":
             out = cv2.VideoWriter(
                 temp_output,
                 fourcc,
-                fps,
-                (width, height)
+                video_info_dic["fps"],
+                (video_info_dic["width"], video_info_dic["height"])
             )
     
             # -----------------------------
@@ -631,7 +637,7 @@ elif st.session_state.page == "result":
     
                 frame_idx += 1
         
-                progress = int(frame_idx / total_frames * 100)
+                progress = int(frame_idx / video_info_dic["total_frames"] * 100)
                 progress_bar.progress(progress)
             
                 # -----------------------------
@@ -641,7 +647,7 @@ elif st.session_state.page == "result":
             
                 fps_processing = frame_idx / elapsed_time
             
-                remaining_frames = total_frames - frame_idx
+                remaining_frames = video_info_dic["total_frames"] - frame_idx
             
                 remaining_time = remaining_frames / fps_processing
             
@@ -650,7 +656,7 @@ elif st.session_state.page == "result":
                 # -----------------------------
                 status_text.text(
                     f"""
-                    처리 프레임: {frame_idx}/{total_frames}
+                    처리 프레임: {frame_idx}/{video_info_dic["total_frames"]}
                     처리 FPS: {fps_processing:.2f}
                     경과 시간: {elapsed_time:.1f}초
                     남은 예상 시간: {remaining_time:.1f}초
