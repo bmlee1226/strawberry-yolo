@@ -467,9 +467,9 @@ elif st.session_state.page == "result":
             tfile2 = tempfile.NamedTemporaryFile(delete=False)
             tfile2.write(uploaded_file.read())
         
-            cap = cv2.VideoCapture(tfile2.name)
+            cap2 = cv2.VideoCapture(tfile2.name)
             
-            fps = cap.get(cv2.CAP_PROP_FPS)
+            fps = cap2.get(cv2.CAP_PROP_FPS)
     
             with st.spinner("AI가 병해충을 분석중입니다..."):
                 @st.cache_resource
@@ -487,12 +487,12 @@ elif st.session_state.page == "result":
                 
                 progress_bar = st.progress(0)
         
-                total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                total_frames = int(cap2.get(cv2.CAP_PROP_FRAME_COUNT))
 
                 st.write(total_frames)
 
                 while True:
-                    ret, frame = cap.read()
+                    ret, frame = cap2.read()
 
                     st.write(frame)
                 
