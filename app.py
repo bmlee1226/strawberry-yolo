@@ -385,7 +385,7 @@ elif st.session_state.page == "result":
         # 프레임 처리
         # -----------------------------
         while cap.isOpened():
-    
+            last_annotated_frame = None
             ret, frame = cap.read()
     
             if not ret:
