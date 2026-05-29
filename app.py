@@ -464,10 +464,10 @@ elif st.session_state.page == "result":
 
         if st.session_state.analysis_type == "fast":
             # 임시 파일로 저장
-            tfile = tempfile.NamedTemporaryFile(delete=False)
-            tfile.write(uploaded_file.read())
+            tfile2 = tempfile.NamedTemporaryFile(delete=False)
+            tfile2.write(uploaded_file.read())
         
-            cap = cv2.VideoCapture(tfile.name)
+            cap = cv2.VideoCapture(tfile2.name)
             
             fps = cap.get(cv2.CAP_PROP_FPS)
     
@@ -488,7 +488,7 @@ elif st.session_state.page == "result":
                 progress_bar = st.progress(0)
         
                 total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        
+
                 while True:
                     ret, frame = cap.read()
                 
