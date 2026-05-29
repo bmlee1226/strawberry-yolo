@@ -154,7 +154,12 @@ if st.session_state.page == "home":
 
     st.session_state.conf_threshold = conf_threshold
 
-    
+    tab1, tab2, tab3, tab4 = st.tabs([
+    "이미지 분석",
+    "영상 빠른 분석",
+    "영상 정밀 분석",
+    "실시간 분석"
+])
     
     st.divider()
     st.write("원하는 분석 방식을 선택하세요.")
