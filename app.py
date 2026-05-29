@@ -376,40 +376,27 @@ elif st.session_state.page == "result":
         # -----------------------------
         progress_bar = st.progress(0)
 
-        # 몇 프레임마다 분석할지
-        frame_skip = 3
-    
         frame_idx = 0
     
         # -----------------------------
         # 프레임 처리
         # -----------------------------
         while cap.isOpened():
-            last_annotated_frame = None
             ret, frame = cap.read()
     
             if not ret:
                 break
 
-            # 프레임 번호 증가
+            # YOLO 추론
+            results = model(frame)
+
+            # bbox 그려진 결과 프레임
+            annotated_frame = results[0].plot()
+
+            # 저장
+            out.write(annotated_frame)
+
             frame_idx += 1
-                
-            # -----------------------------
-            # YOLO 수행
-            # -----------------------------
-            if frame_idx % frame_skip == 0:
-        
-                results = model(frame)
-        
-                last_annotated_frame = results[0].plot()
-        
-            # -----------------------------
-            # skip 프레임은 이전 결과 사용
-            # -----------------------------
-            if last_annotated_frame is not None:
-                out.write(last_annotated_frame)
-            else:
-                out.write(frame)
     
             progress = int(frame_idx / total_frames * 100)
             progress_bar.progress(progress)
