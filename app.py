@@ -344,15 +344,20 @@ elif st.session_state.page == "result":
         fps = cap.get(cv2.CAP_PROP_FPS)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
+        # fps 오류 방지
+        if fps == 0:
+            fps = 30
+
         # -----------------------------
         # 결과 영상 저장 경로
         # -----------------------------
-        output_path = "result.mp4"
+
+        temp_output = "temp_result.mp4"
     
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     
         out = cv2.VideoWriter(
-            output_path,
+            temp_output,
             fourcc,
             fps,
             (width, height)
@@ -403,14 +408,36 @@ elif st.session_state.page == "result":
         st.success("분석 완료!")
     
         # -----------------------------
+        # H.264 변환
+        # -----------------------------
+        final_output = "final_result.mp4"
+    
+        command = [
+            "ffmpeg",
+            "-y",
+            "-i",
+            temp_output,
+            "-vcodec",
+            "libx264",
+            "-acodec",
+            "aac",
+            final_output
+        ]
+    
+        subprocess.run(command)
+    
+        st.success("영상 생성 완료!")    
+
+    
+        # -----------------------------
         # 결과 영상 표시
         # -----------------------------
-        st.video(output_path)
+        st.video(final_output)
     
         # -----------------------------
         # 다운로드 버튼
         # -----------------------------
-        with open(output_path, "rb") as file:
+        with open(final_output, "rb") as file:
             st.download_button(
                 label="결과 영상 다운로드",
                 data=file,
