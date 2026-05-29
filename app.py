@@ -489,8 +489,12 @@ elif st.session_state.page == "result":
         
                 total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
+                st.write(total_frames)
+
                 while True:
                     ret, frame = cap.read()
+
+                    st.write(frame)
                 
                     if not ret:
                         break
