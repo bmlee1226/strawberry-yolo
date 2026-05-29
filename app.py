@@ -505,8 +505,6 @@ elif st.session_state.page == "result":
                 
                 progress_bar = st.progress(0)
 
-                st.write(total_frames)
-
                 while True:
                     ret, frame = cap.read()
                 
@@ -651,6 +649,11 @@ elif st.session_state.page == "result":
             preview_frame = st.empty()
     
             frame_idx = 0
+
+            detection_counts = 0
+    
+            detected_classes = set()
+        
         
             # -----------------------------
             # 프레임 처리
@@ -663,6 +666,18 @@ elif st.session_state.page == "result":
     
                 # YOLO 추론
                 results = model(frame)
+
+                if len(results[0].boxes) > 0:
+
+                    detection_counts += 1
+            
+                    best_idx = results[0].boxes.conf.argmax()
+                
+                    class_id = int(results[0].boxes.cls[best_idx])
+
+                    info = disease_info[class_id]
+
+                    detected_classes.add(class_id)
     
                 # bbox 그려진 결과 프레임
                 annotated_frame = results[0].plot()
@@ -745,7 +760,39 @@ elif st.session_state.page == "result":
                     file_name="result.mp4",
                     mime="video/mp4"
                 )
-        
+
+    
+            # -----------------------------------
+            # 결과 출력
+            # -----------------------------------
+    
+            st.header("📊 병해충 탐지 결과")
+
+            st.info(
+    f"현재 신뢰도 임계값 (Confidence Threshold): {conf_threshold}"
+)
+    
+            if detection_counts == 0:
+    
+                st.success("✅ 병해충이 탐지되지 않았습니다.")
+    
+            else:
+                for class_id in detected_classes:
+    
+                    info = disease_info[class_id]
+                    st.header(f"🩺 {info["name"]} 병해충 정보")
+    
+                    with st.container(border=True):
+                        # with st.expander("🎯 병해 상세 정보"):
+                            st.write(info["symptom"])
+                        
+                            st.write(info["cause"])
+                
+                            st.write(info["solution"])
+                
+                            st.write("🍓 병해 예시 이미지")
+                            st.image(info["image"])
+                            st.caption(info["name"])
 
     if st.button("🔙 처음으로"):
 
