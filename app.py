@@ -381,6 +381,8 @@ elif st.session_state.page == "result":
 
         status_text = st.empty()
 
+        preview_frame = st.empty()
+
         frame_idx = 0
     
         # -----------------------------
@@ -427,6 +429,11 @@ elif st.session_state.page == "result":
                 경과 시간: {elapsed_time:.1f}초
                 남은 예상 시간: {remaining_time:.1f}초
                 """
+            )
+
+            preview_frame.image(
+                annotated_frame,
+                channels="BGR"
             )
         # 종료
         cap.release()
