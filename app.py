@@ -392,6 +392,11 @@ elif st.session_state.page == "video":
                 # 결과 페이지로 이동
                 st.session_state.page = "result"
                 st.session_state.analysis_type = "precise"
+                st.session_state.cap = cap
+                st.session_state.fps = fps
+                st.session_state.width = width
+                st.session_state.height = height
+                st.session_state.total_frames = total_frames
         
                 st.rerun()
 
