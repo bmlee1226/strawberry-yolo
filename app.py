@@ -574,7 +574,7 @@ elif st.session_state.page == "result":
                                 st.write("🍓 병해 예시 이미지")
                                 st.image(info["image"])
                                 st.caption(info["name"])
-        elif st.session_state.analysis_type = "precise":
+        elif st.session_state.analysis_type == "precise":
             
             # 임시 파일로 저장
             tfile = tempfile.NamedTemporaryFile(delete=False)
