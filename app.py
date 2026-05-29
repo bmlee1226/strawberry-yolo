@@ -107,6 +107,39 @@ def show_disease_info(class_id):
 
         st.caption(info["name"])
 
+def show_detection_result(results):
+    detection = False
+    class_id = None
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.image(results[0].plot())
+    
+    with col2:
+        if len(results[0].boxes) == 0:
+            st.subheader("탐지된 병해충이 없습니다.")
+            st.success("건강한 딸기로 보입니다 🍓")
+    
+        else:
+            detection = True
+            
+            best_idx = results[0].boxes.conf.argmax()
+        
+            class_id = int(results[0].boxes.cls[best_idx])
+        
+            conf = float(results[0].boxes.conf[best_idx])
+        
+            info = disease_info[class_id]
+    
+            st.subheader(info["explain"])
+    
+            st.progress(conf)
+    
+            st.write(f"신뢰도: {conf:.2f}")
+
+    return class_id, detection
+
 # -----------------------------------
 # session_state 초기화
 # -----------------------------------
@@ -442,34 +475,10 @@ elif st.session_state.page == "result":
         
         results = model(image, conf=conf_threshold)
 
-        plotted = results[0].plot()
-    
-        col1, col2 = st.columns(2)
-    
-        with col1:
-            st.image(plotted)
-    
-        if len(results[0].boxes) > 0:
-    
-            best_idx = results[0].boxes.conf.argmax()
-        
-            class_id = int(results[0].boxes.cls[best_idx])
-        
-            conf = float(results[0].boxes.conf[best_idx])
+        class_id, detection = show_detection_result(results)
 
-            with col2:
-                st.subheader(info["explain"])
-    
-                confidence = float(conf)
-                st.progress(confidence)
-                st.write(f"신뢰도: {conf:.2f}")
-
+        if detection ==True:
             show_disease_info(class_id)
-        
-        else:
-            with col2:
-                st.subheader("탐지된 병해충이 없습니다.")
-                st.success("건강한 딸기로 보입니다 🍓")
 
     # 동영상인 경우
     elif "video" in file_type:
@@ -512,40 +521,13 @@ elif st.session_state.page == "result":
                 if frame_count % int(fps) == 0:
             
                     results = model(frame, conf=conf_threshold)
-    
-                    plotted = results[0].plot()
-            
-                    col1, col2 = st.columns(2)
-                
-                    with col1:
-                        st.image(plotted)
-                
-                    if len(results[0].boxes) > 0:
-    
-                        detection_counts += 1
-                
-                        best_idx = results[0].boxes.conf.argmax()
-                    
-                        class_id = int(results[0].boxes.cls[best_idx])
-    
-                        info = disease_info[class_id]
-    
-                        detected_classes.add(class_id)
-                    
-                        conf = float(results[0].boxes.conf[best_idx])
-                        
-                        with col2:
-                            st.subheader(info["explain"])
-                
-                            confidence = float(conf)
-                            st.progress(confidence)
-                            st.write(f"신뢰도: {conf:.2f}")
-    
-                    else:
-                        with col2:
-                            st.subheader("탐지된 병해충이 없습니다.")
-                            st.success("건강한 딸기로 보입니다 🍓")
 
+                    class_id, detection = show_detection_result(results)
+            
+                    if detection ==True:
+                        detection_counts += 1
+                        detected_classes.add(class_id)
+                        
                 frame_count += 1
     
             progress_bar.empty()
