@@ -263,7 +263,7 @@ elif st.session_state.page == "video":
             suffix=".mp4"
         )
     
-        tfile.write(uploaded_file.read())
+        tfile.write(uploaded_video_file.read())
     
         video_path = tfile.name
     
