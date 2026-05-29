@@ -276,7 +276,9 @@ elif st.session_state.page == "video":
     
         if fps == 0:
             fps = 30
-    
+
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     
         duration_sec = total_frames / fps
@@ -356,6 +358,11 @@ elif st.session_state.page == "video":
                 # 결과 페이지로 이동
                 st.session_state.page = "result"
                 st.session_state.analysis_type = "fast"
+                st.session_state.cap = cap
+                st.session_state.fps = fps
+                st.session_state.width = width
+                st.session_state.height = height
+                st.session_state.total_frames = total_frames
         
                 st.rerun()
     
@@ -463,13 +470,9 @@ elif st.session_state.page == "result":
     elif "video" in file_type:
 
         if st.session_state.analysis_type == "fast":
-            # 임시 파일로 저장
-            tfile2 = tempfile.NamedTemporaryFile(delete=False)
-            tfile2.write(uploaded_file.read())
-        
-            cap2 = cv2.VideoCapture(tfile2.name)
-            
-            fps = cap2.get(cv2.CAP_PROP_FPS)
+            cap = st.session_state.cap
+            fps = st.session_state.fps
+            total_frames = st.session_state.total_frames
     
             with st.spinner("AI가 병해충을 분석중입니다..."):
                 @st.cache_resource
@@ -486,8 +489,6 @@ elif st.session_state.page == "result":
                 detected_classes = set()
                 
                 progress_bar = st.progress(0)
-        
-                total_frames = int(cap2.get(cv2.CAP_PROP_FRAME_COUNT))
 
                 st.write(total_frames)
 
@@ -579,16 +580,12 @@ elif st.session_state.page == "result":
                                 st.image(info["image"])
                                 st.caption(info["name"])
         elif st.session_state.analysis_type == "precise":
-            
-            # 임시 파일로 저장
-            tfile = tempfile.NamedTemporaryFile(delete=False)
-            tfile.write(uploaded_file.read())
-        
-            cap = cv2.VideoCapture(tfile.name)
-            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fps = cap.get(cv2.CAP_PROP_FPS)
-            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+            cap = st.session_state.cap
+            fps = st.session_state.fps
+            width = st.session_state.width
+            height = st.session_state.height
+            total_frames = st.session_state.total_frames
     
             # fps 오류 방지
             if fps == 0:
