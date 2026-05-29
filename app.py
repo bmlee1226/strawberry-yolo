@@ -252,9 +252,6 @@ elif st.session_state.page == "video":
     if uploaded_video_file is not None:
 
         video_bytes = uploaded_video_file.read()
-        # session_state 저장
-        st.session_state.video_bytes = video_bytes
-
         st.session_state.uploaded_file = uploaded_video_file
 
         st.success("✅ 동영상 업로드 완료")
@@ -268,6 +265,10 @@ elif st.session_state.page == "video":
         )
     
         tfile.write(video_bytes)
+
+        # session_state 저장
+        st.session_state.video_path = tfile.name
+
     
         video_path = tfile.name
     
@@ -469,16 +470,8 @@ elif st.session_state.page == "result":
     elif "video" in file_type:
 
         if st.session_state.analysis_type == "fast":
-            video_bytes = st.session_state.video_bytes
 
-            tfile = tempfile.NamedTemporaryFile(
-                delete=False,
-                suffix=".mp4"
-            )
-        
-            tfile.write(video_bytes)
-        
-            video_path = tfile.name
+            video_path = st.session_state.video_path
 
             cap = cv2.VideoCapture(video_path)
         
@@ -592,16 +585,7 @@ elif st.session_state.page == "result":
                                 st.caption(info["name"])
         elif st.session_state.analysis_type == "precise":
 
-            video_bytes = st.session_state.video_bytes
-
-            tfile = tempfile.NamedTemporaryFile(
-                delete=False,
-                suffix=".mp4"
-            )
-        
-            tfile.write(video_bytes)
-        
-            video_path = tfile.name
+            video_path = st.session_state.video_path
 
             cap = cv2.VideoCapture(video_path)
         
