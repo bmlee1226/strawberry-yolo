@@ -339,8 +339,23 @@ elif st.session_state.page == "result":
         tfile.write(uploaded_file.read())
     
         cap = cv2.VideoCapture(tfile.name)
-        
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = cap.get(cv2.CAP_PROP_FPS)
+
+        # -----------------------------
+        # 결과 영상 저장 경로
+        # -----------------------------
+        output_path = "result.mp4"
+    
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    
+        out = cv2.VideoWriter(
+            output_path,
+            fourcc,
+            fps,
+            (width, height)
+        )
 
         with st.spinner("AI가 병해충을 분석중입니다..."):
             @st.cache_resource
@@ -349,102 +364,173 @@ elif st.session_state.page == "result":
             
             model = load_model()
     
-            frame_count = 0
-            saved_count = 0
+        # -----------------------------
+        # 진행률 표시
+        # -----------------------------
+        progress_bar = st.progress(0)
     
-            detection_counts = 0
+        frame_idx = 0
     
-            detected_classes = set()
-            
-            progress_bar = st.progress(0)
+        # -----------------------------
+        # 프레임 처리
+        # -----------------------------
+        while cap.isOpened():
     
-            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            ret, frame = cap.read()
     
-            while True:
-                ret, frame = cap.read()
-            
-                if not ret:
-                    break
+            if not ret:
+                break
     
-                # 진행률 표시
-                progress = min(frame_count / total_frames, 1.0)
+            # YOLO 추론
+            results = model(frame)
     
-                progress_bar.progress(progress)
+            # bbox 그려진 결과 프레임
+            annotated_frame = results[0].plot()
     
-            
-                # 1초마다 1프레임 저장
-                if frame_count % int(fps) == 0:
-            
-                    results = model(frame, conf=conf_threshold)
+            # 저장
+            out.write(annotated_frame)
     
-                    plotted = results[0].plot()
-            
-                    col1, col2 = st.columns(2)
-                
-                    with col1:
-                        st.image(plotted)
-                
-                    if len(results[0].boxes) > 0:
+            frame_idx += 1
     
-                        detection_counts += 1
-                
-                        best_idx = results[0].boxes.conf.argmax()
-                    
-                        class_id = int(results[0].boxes.cls[best_idx])
+            progress = int(frame_idx / total_frames * 100)
+            progress_bar.progress(progress)
     
-                        info = disease_info[class_id]
+        # 종료
+        cap.release()
+        out.release()
     
-                        detected_classes.add(class_id)
-                    
-                        conf = float(results[0].boxes.conf[best_idx])
-                        
-                        with col2:
-                            st.subheader(info["explain"])
-                
-                            confidence = float(conf)
-                            st.progress(confidence)
-                            st.write(f"신뢰도: {conf:.2f}")
+        st.success("분석 완료!")
     
-                    else:
-                        with col2:
-                            st.subheader("탐지된 병해충이 없습니다.")
-                            st.success("건강한 딸기로 보입니다 🍓")
+        # -----------------------------
+        # 결과 영상 표시
+        # -----------------------------
+        st.video(output_path)
     
-                frame_count += 1
+        # -----------------------------
+        # 다운로드 버튼
+        # -----------------------------
+        with open(output_path, "rb") as file:
+            st.download_button(
+                label="결과 영상 다운로드",
+                data=file,
+                file_name="result.mp4",
+                mime="video/mp4"
+            )
     
-            progress_bar.empty()
+#     # 동영상인 경우
+#     elif "video" in file_type:
+        
+#         # 임시 파일로 저장
+#         tfile = tempfile.NamedTemporaryFile(delete=False)
+#         tfile.write(uploaded_file.read())
     
-            # -----------------------------------
-            # 결과 출력
-            # -----------------------------------
-    
-            st.header("📊 병해충 탐지 결과")
+#         cap = cv2.VideoCapture(tfile.name)
+        
+#         fps = cap.get(cv2.CAP_PROP_FPS)
 
-            st.info(
-    f"현재 신뢰도 임계값 (Confidence Threshold): {conf_threshold}"
-)
+#         with st.spinner("AI가 병해충을 분석중입니다..."):
+#             @st.cache_resource
+#             def load_model():
+#                 return YOLO("best.pt")
+            
+#             model = load_model()
     
-            if detection_counts == 0:
+#             frame_count = 0
+#             saved_count = 0
     
-                st.success("✅ 병해충이 탐지되지 않았습니다.")
+#             detection_counts = 0
     
-            else:
-                for class_id in detected_classes:
+#             detected_classes = set()
+            
+#             progress_bar = st.progress(0)
     
-                    info = disease_info[class_id]
-                    st.header(f"🩺 {info["name"]} 병해충 정보")
+#             total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     
-                    with st.container(border=True):
-                        # with st.expander("🎯 병해 상세 정보"):
-                            st.write(info["symptom"])
+#             while True:
+#                 ret, frame = cap.read()
+            
+#                 if not ret:
+#                     break
+    
+#                 # 진행률 표시
+#                 progress = min(frame_count / total_frames, 1.0)
+    
+#                 progress_bar.progress(progress)
+    
+            
+#                 # 1초마다 1프레임 저장
+#                 if frame_count % int(fps) == 0:
+            
+#                     results = model(frame, conf=conf_threshold)
+    
+#                     plotted = results[0].plot()
+            
+#                     col1, col2 = st.columns(2)
+                
+#                     with col1:
+#                         st.image(plotted)
+                
+#                     if len(results[0].boxes) > 0:
+    
+#                         detection_counts += 1
+                
+#                         best_idx = results[0].boxes.conf.argmax()
+                    
+#                         class_id = int(results[0].boxes.cls[best_idx])
+    
+#                         info = disease_info[class_id]
+    
+#                         detected_classes.add(class_id)
+                    
+#                         conf = float(results[0].boxes.conf[best_idx])
                         
-                            st.write(info["cause"])
+#                         with col2:
+#                             st.subheader(info["explain"])
                 
-                            st.write(info["solution"])
+#                             confidence = float(conf)
+#                             st.progress(confidence)
+#                             st.write(f"신뢰도: {conf:.2f}")
+    
+#                     else:
+#                         with col2:
+#                             st.subheader("탐지된 병해충이 없습니다.")
+#                             st.success("건강한 딸기로 보입니다 🍓")
+    
+#                 frame_count += 1
+    
+#             progress_bar.empty()
+    
+#             # -----------------------------------
+#             # 결과 출력
+#             # -----------------------------------
+    
+#             st.header("📊 병해충 탐지 결과")
+
+#             st.info(
+#     f"현재 신뢰도 임계값 (Confidence Threshold): {conf_threshold}"
+# )
+    
+#             if detection_counts == 0:
+    
+#                 st.success("✅ 병해충이 탐지되지 않았습니다.")
+    
+#             else:
+#                 for class_id in detected_classes:
+    
+#                     info = disease_info[class_id]
+#                     st.header(f"🩺 {info["name"]} 병해충 정보")
+    
+#                     with st.container(border=True):
+#                         # with st.expander("🎯 병해 상세 정보"):
+#                             st.write(info["symptom"])
+                        
+#                             st.write(info["cause"])
                 
-                            st.write("🍓 병해 예시 이미지")
-                            st.image(info["image"])
-                            st.caption(info["name"])
+#                             st.write(info["solution"])
+                
+#                             st.write("🍓 병해 예시 이미지")
+#                             st.image(info["image"])
+#                             st.caption(info["name"])
 
     if st.button("🔙 처음으로"):
 
