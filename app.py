@@ -3,6 +3,7 @@ from ultralytics import YOLO
 from PIL import Image
 import tempfile
 import cv2
+import subprocess
 
 
 disease_info = {
