@@ -407,8 +407,6 @@ elif st.session_state.page == "result":
             # 저장
             out.write(annotated_frame)
     
-            frame_idx += 1
-    
             progress = int(frame_idx / total_frames * 100)
             progress_bar.progress(progress)
     
