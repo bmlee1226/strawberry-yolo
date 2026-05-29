@@ -375,6 +375,9 @@ elif st.session_state.page == "result":
         # 진행률 표시
         # -----------------------------
         progress_bar = st.progress(0)
+
+        # 몇 프레임마다 분석할지
+        frame_skip = 3
     
         frame_idx = 0
     
@@ -387,6 +390,13 @@ elif st.session_state.page == "result":
     
             if not ret:
                 break
+
+            # 프레임 번호 증가
+            frame_idx += 1
+        
+            # skip
+            if frame_idx % frame_skip != 0:
+                continue
     
             # YOLO 추론
             results = model(frame)
