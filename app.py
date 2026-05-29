@@ -509,8 +509,6 @@ elif st.session_state.page == "result":
 
                 while True:
                     ret, frame = cap.read()
-
-                    st.write(frame)
                 
                     if not ret:
                         break
