@@ -6,7 +6,7 @@ IMAGE_PAGE = "image"
 VIDEO_PAGE = "video"
 ANALYSIS_PAGE = "analysis"
 RESULT_PAGE = "result"
-  
+
 def router():
 
   page = st.session_state.page
