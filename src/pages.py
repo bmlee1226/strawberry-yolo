@@ -276,7 +276,7 @@ def page_video():
               # 결과 페이지로 이동
               go_to("result")
 
-def page_result():
+def page_analysis():
   st.title("📊 분석 결과")
   
   uploaded_file = st.session_state.uploaded_file
@@ -303,8 +303,114 @@ def page_result():
           video_path = st.session_state.video_path
           process.process_precise_video(video_path, model, conf_threshold)
   
-  
-  if st.button("🔙 처음으로"):
+
+def page_result():
+
+    uploaded_file = st.session_state.uploaded_file
+    file_type = uploaded_file.type
+
+    result_list = st.session_state.result_list
+
+    if "image" in file_type:
+        utility.render_detection_result(result_list[0], result_list[1], result_list[2], result_list[3])
+
+        if result_list[3]:
+            utility.show_disease_info(result_list[1])
+    
+    elif "video" in file_type:
+        if st.session_state.analysis_type == "fast":
+            for results, class_id, conf, detection in result_list:
+                utility.render_detection_result(results, class_id, conf, detection)
+            
+            # -----------------------------------
+            # 결과 출력
+            # -----------------------------------
+            
+            st.header("📊 병해충 탐지 결과")
+            
+            st.info(
+            f"현재 신뢰도 임계값 (Confidence Threshold): {st.session_state.conf_threshold}"
+            )
+            
+            if st.session_state.detection_frame_count == 0:
+            
+              st.success("✅ 병해충이 탐지되지 않았습니다.")
+            
+            else:
+              for class_id in st.session_state.detected_classes:
+                  utility.show_disease_info(class_id)
+                  
+        elif st.session_state.analysis_type == "precise":
+    
+          # -----------------------------
+          # H.264 변환
+          # -----------------------------
+          final_output = tempfile.NamedTemporaryFile(
+              delete=False,
+              suffix=".mp4"
+          ).name
+          
+          command = [
+              "ffmpeg",
+              "-y",
+              "-i",
+              st.session_state.temp_output,
+              "-vcodec",
+              "libx264",
+              "-acodec",
+              "aac",
+              final_output
+          ]
+        
+          try:
+              subprocess.run(
+                  command,
+                  check=True
+              )
+          
+          except Exception as e:
+          
+              st.error(f"영상 변환 실패: {e}")
+          
+          st.success("영상 생성 완료!")    
+          
+          
+          # -----------------------------
+          # 결과 영상 표시
+          # -----------------------------
+          st.video(final_output)
+          
+          # -----------------------------
+          # 다운로드 버튼
+          # -----------------------------
+          with open(final_output, "rb") as file:
+              st.download_button(
+                  label="결과 영상 다운로드",
+                  data=file,
+                  file_name="result.mp4",
+                  mime="video/mp4"
+              )
+          
+          
+          # -----------------------------------
+          # 결과 출력
+          # -----------------------------------
+          
+          st.header("📊 병해충 탐지 결과")
+          
+          st.info(
+          f"현재 신뢰도 임계값 (Confidence Threshold): {st.session_state.conf_threshold}"
+          )
+          
+          if st.session_state.detection_frame_count == 0:
+          
+              st.success("✅ 병해충이 탐지되지 않았습니다.")
+          
+          else:
+              for class_id in st.session_state.detected_classes:
+                  utility.show_disease_info(class_id)
+        
+    if st.button("🔙 처음으로"):
     
       st.session_state.uploaded_file = None
       
