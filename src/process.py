@@ -9,6 +9,7 @@ import os
 
 from src import utility
 from src.disease_data import disease_info
+from src.data_models import ImageAnalysisResult, FastVideoAnalysisResult, PreciseVideoAnalysisResult
 
 def process_image(uploaded_file, model, conf_threshold):
   image = Image.open(uploaded_file)
