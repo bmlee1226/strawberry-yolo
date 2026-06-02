@@ -1,10 +1,4 @@
 import streamlit as st
-from ultralytics import YOLO
-from PIL import Image
-import tempfile
-import cv2
-import subprocess
-import time
 from src import pages
 
 # -----------------------------------
