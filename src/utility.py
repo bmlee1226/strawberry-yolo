@@ -2,6 +2,7 @@ import cv2
 import streamlit as st
 
 from src.disease_data import disease_info
+from src.types import DetectionResult
 
 def show_disease_info(class_id):
 
@@ -24,9 +25,15 @@ def show_disease_info(class_id):
 
 def parse_detection_result(results):
     result = results[0]
+    annotated_frame = result.plot()
 
     if len(result.boxes) == 0:
-        return None, None, False
+        return DetectionResult(
+            class_id=None,
+            conf=None,
+            detection=False,
+            annotated_frame=annotated_frame
+        )
 
     else:
         best_idx = result.boxes.conf.argmax()
@@ -35,7 +42,12 @@ def parse_detection_result(results):
     
         conf = float(result.boxes.conf[best_idx])
 
-    return class_id, conf, True
+    return DetectionResult(
+        class_id=class_id,
+        conf=conf,
+        detection=True,
+        annotated_frame=annotated_frame
+    )
 
 
 def render_detection_result(annotated_frame, class_id, conf, detected):
