@@ -128,7 +128,7 @@ def page_image():
       st.success("✅ 이미지 업로드 완료")
   
       # 결과 페이지로 이동
-      go_to("result")
+      go_to("analysis")
   
   elif camera_image:
       st.session_state.uploaded_file = camera_image
@@ -136,7 +136,7 @@ def page_image():
       st.success("✅ 이미지 업로드 완료")
   
       # 결과 페이지로 이동
-      go_to("result")
+      go_to("analysis")
 
 def page_video():
   
@@ -247,7 +247,7 @@ def page_video():
               st.session_state.analysis_type = "fast"
   
               # 결과 페이지로 이동
-              go_to("result")
+              go_to("analysis")
   
       # -----------------------------
       # 정밀 분석
@@ -274,10 +274,10 @@ def page_video():
               st.session_state.analysis_type = "precise"
   
               # 결과 페이지로 이동
-              go_to("result")
+              go_to("analysis")
 
 def page_analysis():
-  st.title("📊 분석 결과")
+  st.title("📊 분석 중")
   
   uploaded_file = st.session_state.uploaded_file
   conf_threshold = st.session_state.conf_threshold
@@ -302,6 +302,8 @@ def page_analysis():
   
           video_path = st.session_state.video_path
           process.process_precise_video(video_path, model, conf_threshold)
+
+    go_to("result")
   
 
 def page_result():
@@ -310,6 +312,8 @@ def page_result():
     file_type = uploaded_file.type
 
     result_list = st.session_state.result_list
+
+    st.title("📊 분석 결과")
 
     if "image" in file_type:
         utility.render_detection_result(result_list[0], result_list[1], result_list[2], result_list[3])
