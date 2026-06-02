@@ -39,8 +39,7 @@ def init_session_state():
         "video_path": None,
         "analysis_type": None,
         "analysis_result": None,
-        "conf_threshold": 0.3,
-        "analysis_done": False
+        "conf_threshold": 0.3
     }
 
     for key, value in defaults.items():
