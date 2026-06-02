@@ -23,5 +23,5 @@ class AnalysisResult:
     detected_classes: set[int]
     detection_frame_count: int
     conf_threshold: float
-    temp_output : str | None = None
+    temp_output : str
     final_output: str | None = None
