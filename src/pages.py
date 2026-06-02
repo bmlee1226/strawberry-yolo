@@ -2,7 +2,7 @@ import streamlit as st
 import process
 from ultralytics import YOLO
 import tempfile
-from utility import get_video_info
+from src import utility
 
 def page_home():
   st.title("🍓 딸기 병해충 진단 AI")
@@ -171,7 +171,7 @@ def page_video():
       # 영상 정보 읽기
       # -----------------------------
   
-      video_info_dic = get_video_info(video_path)
+      video_info_dic = utility.get_video_info(video_path)
   
       # -----------------------------
       # 영상 정보 표시
