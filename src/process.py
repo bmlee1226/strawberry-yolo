@@ -5,6 +5,7 @@ import cv2
 import tempfile
 import subprocess
 import time
+import os
 
 from src import utility
 from src.disease_data import disease_info
@@ -14,15 +15,14 @@ def process_image(uploaded_file, model, conf_threshold):
   
   st.divider()
   
-  result_list = []
   
   results = model(image, conf=conf_threshold)
 
   detection_result = utility.parse_detection_result(results)
 
-  result_list.append(detection_result)
+  result_list = [detection_result]
 
-  return {"result_list" : result_list}
+  return ImageAnalysisResult(result_list=result_list)
 
 def process_fast_video(video_path, model, conf_threshold):
   
@@ -49,7 +49,7 @@ def process_fast_video(video_path, model, conf_threshold):
       # 진행률 표시
       progress = min(frame_count / videoinfo.total_frames, 1.0)
   
-      progress_bar.progress(progress)
+      progress_bar.progress(int(progress * 100))
   
   
       # 1초마다 1프레임 저장
@@ -61,24 +61,25 @@ def process_fast_video(video_path, model, conf_threshold):
         
           result_list.append(detection_result)
         
-          if detection:
+          if detection_result.detection:
               detection_frame_count += 1
-              detected_classes.add(class_id)
+              detected_classes.add(detection_result.class_id)
               
       frame_count += 1
   
   progress_bar.empty()
   cap.release()
 
-  return {"result_list" : result_list,
-          "detection_frame_count" : detection_frame_count,
-          "detected_classes" : detected_classes,
-          "conf_threshold" : conf_threshold}
+  return FastVideoAnalysisResult(
+          result_list=result_list,
+          detection_frame_count=detection_frame_count,
+          detected_classes=detected_classes,
+          conf_threshold=conf_threshold)
 
 
 def process_precise_video(video_path, model, conf_threshold):
   
-  videoinfo = utility.(video_path)
+  videoinfo = utility.get_video_info(video_path)
   
   cap = cv2.VideoCapture(video_path)
   
@@ -129,17 +130,14 @@ def process_precise_video(video_path, model, conf_threshold):
   
       # YOLO 추론
       results = model(frame, conf=conf_threshold)
-      class_id, conf, detection = utility.parse_detection_result(results)
+      detection_result = utility.parse_detection_result(results)
 
-      if class_id is not None:
-        detected_classes.add(class_id)
+      if detection_result.detection:
+        detected_classes.add(detection_result.class_id)
         detection_frame_count += 1
   
-      # bbox 그려진 결과 프레임
-      annotated_frame = results[0].plot()
-  
       # 저장
-      out.write(annotated_frame)
+      out.write(detection_result.annotated_frame)
   
       frame_idx += 1
   
@@ -171,10 +169,10 @@ def process_precise_video(video_path, model, conf_threshold):
             """
         )
     
-      if frame_idx % 10 == 0:
+      if frame_idx % 30 == 0:
       
           preview_frame.image(
-              annotated_frame,
+              detection_result.annotated_frame,
               channels="BGR"
           )
         
@@ -195,7 +193,7 @@ def process_precise_video(video_path, model, conf_threshold):
       "ffmpeg",
       "-y",
       "-i",
-      analysis_result["temp_output"],
+      temp_output,
       "-vcodec",
       "libx264",
       "-acodec",
@@ -214,11 +212,13 @@ def process_precise_video(video_path, model, conf_threshold):
       st.error(f"영상 변환 실패: {e}")
   
   st.success("영상 생성 완료!")    
+  os.remove(temp_output)
 
-  return {"detection_frame_count" : detection_frame_count,
-          "detected_classes" : detected_classes,
-          "temp_output" : temp_output,
-          "conf_threshold" : conf_threshold,
-          "final_output" : final_output}
+  return PreciseVideoAnalysisResult(
+          detection_frame_count=detection_frame_count,
+          detected_classes=detected_classes,
+          temp_output=temp_output,
+          conf_threshold=conf_threshold,
+          final_output=final_output)
   
   
