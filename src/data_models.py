@@ -18,29 +18,10 @@ class VideoInfo:
     duration: float
 
 @dataclass
-class ImageAnalysisResult:
+class AnalysisResult:
     result_list: list[DetectionResult]
-
-@dataclass
-class FastVideoAnalysisResult:
-
-    result_list: list[DetectionResult]
-
-    detection_frame_count: int
-
     detected_classes: set[int]
-
-    conf_threshold: float
-
-@dataclass
-class PreciseVideoAnalysisResult:
-
     detection_frame_count: int
-
-    detected_classes: set[int]
-
     conf_threshold: float
-
-    temp_output : str
-  
-    final_output : str
+    temp_output : str | None = None
+    final_output: str | None = None
