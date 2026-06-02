@@ -289,7 +289,7 @@ def page_analysis():
   # 이미지인 경우
   if "image" in file_type:
   
-      process.process_image(uploaded_file, model, conf_threshold)
+      analysis_result = process.process_image(uploaded_file, model, conf_threshold)
   
   # 동영상인 경우
   elif "video" in file_type:
@@ -297,14 +297,15 @@ def page_analysis():
       if st.session_state.analysis_type == "fast":
           
           video_path = st.session_state.video_path
-          process.process_fast_video(video_path, model, conf_threshold)
+          analysis_result = process.process_fast_video(video_path, model, conf_threshold)
   
                   
       elif st.session_state.analysis_type == "precise":
   
           video_path = st.session_state.video_path
-          process.process_precise_video(video_path, model, conf_threshold)
+          analysis_result = process.process_precise_video(video_path, model, conf_threshold)
 
+  st.session_state.analysis_result = analysis_result
   go_to("result")
   
 
@@ -312,9 +313,10 @@ def page_result():
 
     uploaded_file = st.session_state.uploaded_file
     file_type = uploaded_file.type
+    analysis_result = st.session_state.analysis_result
     
     if "image" in file_type:
-        result_list = st.session_state.result_list
+        result_list = analysis_result["result_list"]
         detection_result = result_list[0]
         
         utility.render_detection_result(detection_result.annotated_frame, 
@@ -322,12 +324,12 @@ def page_result():
                                         detection_result.conf, 
                                         detection_result.detection)
 
-        if result["detection"]:
-            utility.show_disease_info(result["class_id"])
+        if detection_result.detection:
+            utility.show_disease_info(detection_result.class_id)
     
     elif "video" in file_type:
         if st.session_state.analysis_type == "fast":
-            result_list = st.session_state.result_list
+            result_list = analysis_result["result_list"]
             
             for detection_result in result_list:
                 utility.render_detection_result(detection_result.annotated_frame, 
@@ -342,15 +344,15 @@ def page_result():
             st.header("📊 병해충 탐지 결과")
             
             st.info(
-            f"현재 신뢰도 임계값 (Confidence Threshold): {st.session_state.conf_threshold}"
+            f"현재 신뢰도 임계값 (Confidence Threshold): {analysis_result["conf_threshold"]}"
             )
             
-            if st.session_state.detection_frame_count == 0:
+            if analysis_result["detection_frame_count"] == 0:
             
               st.success("✅ 병해충이 탐지되지 않았습니다.")
             
             else:
-              for class_id in st.session_state.detected_classes:
+              for class_id in analysis_result["detected_classes"]:
                   utility.show_disease_info(class_id)
                   
         elif st.session_state.analysis_type == "precise":
@@ -367,7 +369,7 @@ def page_result():
               "ffmpeg",
               "-y",
               "-i",
-              st.session_state.temp_output,
+              analysis_result["temp_output"],
               "-vcodec",
               "libx264",
               "-acodec",
@@ -412,22 +414,20 @@ def page_result():
           st.header("📊 병해충 탐지 결과")
           
           st.info(
-          f"현재 신뢰도 임계값 (Confidence Threshold): {st.session_state.conf_threshold}"
+          f"현재 신뢰도 임계값 (Confidence Threshold): {analysis_result["conf_threshold"]}"
           )
           
-          if st.session_state.detection_frame_count == 0:
+          if analysis_result["detection_frame_count"] == 0:
           
               st.success("✅ 병해충이 탐지되지 않았습니다.")
           
           else:
-              for class_id in st.session_state.detected_classes:
+              for class_id in analysis_result["detected_classes"]:
                   utility.show_disease_info(class_id)
         
     if st.button("🔙 처음으로"):
 
-        temp_output = st.session_state.get(
-            "temp_output"
-        )
+        temp_output = analysis_result["temp_output"]
     
         if temp_output and os.path.exists(temp_output):
     
@@ -443,7 +443,6 @@ def page_result():
     
       st.session_state.uploaded_file = None
       st.session_state.video_path = None
-      st.session_state.temp_output = None
       
       go_to("home")
   
