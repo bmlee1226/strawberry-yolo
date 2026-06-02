@@ -299,7 +299,7 @@ def page_result():
   # 이미지인 경우
   if "image" in file_type:
   
-      process.process_image(uploaded_file, model)
+      process.process_image(uploaded_file, model, conf_threshold)
   
   # 동영상인 경우
   elif "video" in file_type:
@@ -307,13 +307,13 @@ def page_result():
       if st.session_state.analysis_type == "fast":
           
           video_path = st.session_state.video_path
-          process.process_fast_video(video_path, model)
+          process.process_fast_video(video_path, model, conf_threshold)
   
                   
       elif st.session_state.analysis_type == "precise":
   
           video_path = st.session_state.video_path
-          process.process_precise_video(video_path, model)
+          process.process_precise_video(video_path, model, conf_threshold)
   
   
   if st.button("🔙 처음으로"):
