@@ -1,7 +1,7 @@
 import cv2
 import streamlit as st
 
-from src.disease_data import disease_info
+from disease_data import disease_info
 
 def show_disease_info(class_id):
 
