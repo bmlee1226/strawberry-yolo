@@ -1,43 +1,15 @@
-import streamlit as st
-from src import pages
+from src.components import router, init_session_state, render_footer
 
 # -----------------------------------
 # session_state 초기화
 # -----------------------------------
 
-if "page" not in st.session_state:
-    st.session_state.page = "home"
-
-if "uploaded_file" not in st.session_state:
-    st.session_state.uploaded_file = None
+init_session_state()
 
 # -----------------------------------
-# 업로드 페이지
+# router 실행
 # -----------------------------------
 
-if st.session_state.page == "home":
-    pages.page_home()
+router()
 
-
-elif st.session_state.page == "image":
-    pages.page_image()
-        
-# -----------------------------------
-# 동영상 분석 페이지
-# -----------------------------------
-
-elif st.session_state.page == "video":
-    pages.page_video()
-
-
-# -----------------------------------
-# 결과 페이지
-# -----------------------------------
-
-elif st.session_state.page == "result":
-    pages.page_result()
-
-st.markdown("---")
-
-st.caption("YOLO 기반 딸기 병해충 진단 시스템")
-
+render_footer()
