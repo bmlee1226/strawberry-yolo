@@ -21,7 +21,7 @@ def show_disease_info(class_id):
 
         st.caption(info["name"])
 
-def show_detection_result(results):
+def get_detection_result(results):
     detection = False
     class_id = None
 
