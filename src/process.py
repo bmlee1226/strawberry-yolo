@@ -56,7 +56,7 @@ def process_fast_video(video_path, model, conf_threshold):
           results = model(frame, conf=conf_threshold)
   
           class_id, conf, detection = utility.parse_detection_result(results)
-          result_list += [results, class_id, conf, detection]
+          result_list += [[results, class_id, conf, detection]]
   
           if detection:
               detection_frame_count += 1
