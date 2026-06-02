@@ -57,7 +57,7 @@ def render_detection_result(result: DetectionResult):
         st.image(result.annotated_frame, channels="BGR")
     
     with col2:
-        if result.detected:
+        if result.detection:
             info = disease_info.get(result.class_id)
     
             st.subheader(info["explain"])
