@@ -1,10 +1,5 @@
 
 disease_info = {
-    0: "잿빛곰팡이병 (gray_mold) 입니다.",
-    1: "흰가루병 (powdery_mildew) 입니다.",
-}
-
-disease_info = {
     0: {
         "name": "잿빛곰팡이병 (gray_mold)",
         "explain": "잿빛곰팡이병 (gray_mold) 입니다.",
