@@ -315,9 +315,12 @@ def page_result():
     
     if "image" in file_type:
         result_list = st.session_state.result_list
-        result = result_list[0]
+        detection_result = result_list[0]
         
-        utility.render_detection_result(result["annotated_frame"], result["class_id"], result["conf"], result["detection"])
+        utility.render_detection_result(detection_result.annotated_frame, 
+                                        detection_result.class_id, 
+                                        detection_result.conf, 
+                                        detection_result.detection)
 
         if result["detection"]:
             utility.show_disease_info(result["class_id"])
@@ -326,8 +329,11 @@ def page_result():
         if st.session_state.analysis_type == "fast":
             result_list = st.session_state.result_list
             
-            for result in result_list:
-                utility.render_detection_result(result["annotated_frame"], result["class_id"], result["conf"], result["detection"])
+            for detection_result in result_list:
+                utility.render_detection_result(detection_result.annotated_frame, 
+                                                detection_result.class_id,
+                                                detection_result.conf, 
+                                                detection_result.detection)
             
             # -----------------------------------
             # 결과 출력
