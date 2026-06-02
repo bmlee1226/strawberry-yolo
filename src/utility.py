@@ -38,11 +38,11 @@ def parse_detection_result(results):
     return class_id, conf, True
 
 
-def render_detection_result(results, class_id, conf, detected):
+def render_detection_result(annotated_frame, class_id, conf, detected):
     col1, col2 = st.columns(2)
 
     with col1:
-        st.image(results[0].plot())
+        st.image(annotated_frame)
     
     with col2:
         if detected:
