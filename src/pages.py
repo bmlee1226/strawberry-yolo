@@ -277,33 +277,36 @@ def page_video():
               go_to("analysis")
 
 def page_analysis():
-  st.title("📊 분석 중")
-  
-  uploaded_file = st.session_state.uploaded_file
-  conf_threshold = st.session_state.conf_threshold
-  
-  file_type = uploaded_file.type
-  
-  # 이미지인 경우
-  if "image" in file_type:
-  
-      analysis_result = process.process_image(uploaded_file, model, conf_threshold)
-  
-  # 동영상인 경우
-  elif "video" in file_type:
-  
-      if st.session_state.analysis_type == "fast":
-          
-          video_path = st.session_state.video_path
-          analysis_result = process.process_fast_video(video_path, model, conf_threshold)
-  
-                  
-      elif st.session_state.analysis_type == "precise":
-  
-          video_path = st.session_state.video_path
-          analysis_result = process.process_precise_video(video_path, model, conf_threshold)
 
-  st.session_state.analysis_result = analysis_result
+  if st.session_state.analysis_result is None:
+      st.title("📊 분석 중")
+      
+      uploaded_file = st.session_state.uploaded_file
+      conf_threshold = st.session_state.conf_threshold
+      
+      file_type = uploaded_file.type
+      
+      # 이미지인 경우
+      if "image" in file_type:
+      
+          analysis_result = process.process_image(uploaded_file, model, conf_threshold)
+      
+      # 동영상인 경우
+      elif "video" in file_type:
+      
+          if st.session_state.analysis_type == "fast":
+              
+              video_path = st.session_state.video_path
+              analysis_result = process.process_fast_video(video_path, model, conf_threshold)
+      
+                      
+          elif st.session_state.analysis_type == "precise":
+      
+              video_path = st.session_state.video_path
+              analysis_result = process.process_precise_video(video_path, model, conf_threshold)
+    
+      st.session_state.analysis_result = analysis_result
+      
   go_to("result")
   
 
