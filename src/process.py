@@ -9,7 +9,7 @@ import os
 
 from src import utility
 from src.disease_data import disease_info
-from src.data_models import ImageAnalysisResult, FastVideoAnalysisResult, PreciseVideoAnalysisResult
+from src.data_models import AnalysisResult
 
 def process_image(uploaded_file, model, conf_threshold):
   image = Image.open(uploaded_file)
@@ -23,7 +23,7 @@ def process_image(uploaded_file, model, conf_threshold):
 
   result_list = [detection_result]
 
-  return ImageAnalysisResult(result_list=result_list)
+  return AnalysisResult(result_list=result_list)
 
 def process_fast_video(video_path, model, conf_threshold):
   
@@ -71,7 +71,7 @@ def process_fast_video(video_path, model, conf_threshold):
   progress_bar.empty()
   cap.release()
 
-  return FastVideoAnalysisResult(
+  return AnalysisResult(
           result_list=result_list,
           detection_frame_count=detection_frame_count,
           detected_classes=detected_classes,
@@ -215,7 +215,7 @@ def process_precise_video(video_path, model, conf_threshold):
   st.success("영상 생성 완료!")    
   os.remove(temp_output)
 
-  return PreciseVideoAnalysisResult(
+  return AnalysisResult(
           detection_frame_count=detection_frame_count,
           detected_classes=detected_classes,
           temp_output=temp_output,
