@@ -25,7 +25,7 @@ def process_image(uploaded_file, model, conf_threshold):
 
 def process_fast_video(video_path, model, conf_threshold):
   
-  video_info_dic = utility.get_video_info(video_path)
+  videoinfo = utility.get_video_info(video_path)
   
   cap = cv2.VideoCapture(video_path)
   
@@ -46,13 +46,13 @@ def process_fast_video(video_path, model, conf_threshold):
           break
   
       # 진행률 표시
-      progress = min(frame_count / video_info_dic["total_frames"], 1.0)
+      progress = min(frame_count / videoinfo.total_frames, 1.0)
   
       progress_bar.progress(progress)
   
   
       # 1초마다 1프레임 저장
-      if frame_count % int(video_info_dic["fps"]) == 0:
+      if frame_count % int(videoinfo.fps) == 0:
   
           results = model(frame, conf=conf_threshold)
 
@@ -77,7 +77,7 @@ def process_fast_video(video_path, model, conf_threshold):
 
 def process_precise_video(video_path, model, conf_threshold):
   
-  video_info_dic = utility.get_video_info(video_path)
+  videoinfo = utility.(video_path)
   
   cap = cv2.VideoCapture(video_path)
   
@@ -95,8 +95,8 @@ def process_precise_video(video_path, model, conf_threshold):
   out = cv2.VideoWriter(
       temp_output,
       fourcc,
-      video_info_dic["fps"],
-      (video_info_dic["width"], video_info_dic["height"])
+      videoinfo.fps,
+      (videoinfo.width, videoinfo.height)
   )
   
   # -----------------------------
@@ -142,7 +142,7 @@ def process_precise_video(video_path, model, conf_threshold):
   
       frame_idx += 1
   
-      progress = frame_idx / video_info_dic["total_frames"]
+      progress = frame_idx / videoinfo.total_frames
       progress_bar.progress(progress)
   
       # -----------------------------
@@ -152,7 +152,7 @@ def process_precise_video(video_path, model, conf_threshold):
   
       fps_processing = frame_idx / max(elapsed_time, 0.001)
   
-      remaining_frames = video_info_dic["total_frames"] - frame_idx
+      remaining_frames = videoinfo.total_frames - frame_idx
   
       remaining_time = remaining_frames / fps_processing
   
@@ -163,7 +163,7 @@ def process_precise_video(video_path, model, conf_threshold):
       if frame_idx % 5 == 0:
         status_text.text(
             f"""
-            처리 프레임: {frame_idx}/{video_info_dic["total_frames"]}
+            처리 프레임: {frame_idx}/{videoinfo.total_frames}
             처리 FPS: {fps_processing:.2f}
             경과 시간: {elapsed_time:.1f}초
             남은 예상 시간: {remaining_time:.1f}초
