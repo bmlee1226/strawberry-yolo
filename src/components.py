@@ -4,7 +4,7 @@ from src import pages
 HOME_PAGE = "home"
 IMAGE_PAGE = "image"
 VIDEO_PAGE = "video"
-ANALYSIS_PAGE = "anaysis"
+ANALYSIS_PAGE = "analysis"
 RESULT_PAGE = "result"
   
 def router():
