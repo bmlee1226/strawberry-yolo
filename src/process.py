@@ -14,13 +14,14 @@ def process_image(uploaded_file, model, conf_threshold):
   
   st.divider()
   
+  result_list = []
+  
   results = model(image, conf=conf_threshold)
   
   class_id, conf, detection = utility.parse_detection_result(results)
-  utility.render_detection_result(results, class_id, conf, detection)
-  
-  if detection:
-      utility.show_disease_info(class_id)
+  result_list += [results, class_id, conf, detection]
+
+  st.session_state.result_list = result_list
 
 def process_fast_video(video_path, model, conf_threshold):
   
@@ -35,6 +36,8 @@ def process_fast_video(video_path, model, conf_threshold):
   detected_classes = set()
   
   progress_bar = st.progress(0)
+
+  result_list = []
   
   while True:
       ret, frame = cap.read()
@@ -54,7 +57,7 @@ def process_fast_video(video_path, model, conf_threshold):
           results = model(frame, conf=conf_threshold)
   
           class_id, conf, detection = utility.parse_detection_result(results)
-          utility.render_detection_result(results, class_id, conf, detection)
+          result_list += [results, class_id, conf, detection]
   
           if detection:
               detection_frame_count += 1
@@ -64,24 +67,12 @@ def process_fast_video(video_path, model, conf_threshold):
   
   progress_bar.empty()
   cap.release()
-  
-  # -----------------------------------
-  # 결과 출력
-  # -----------------------------------
-  
-  st.header("📊 병해충 탐지 결과")
-  
-  st.info(
-  f"현재 신뢰도 임계값 (Confidence Threshold): {conf_threshold}"
-  )
-  
-  if detection_frame_count == 0:
-  
-      st.success("✅ 병해충이 탐지되지 않았습니다.")
-  
-  else:
-      for class_id in detected_classes:
-          utility.show_disease_info(class_id)
+
+  st.session_state.result_list = result_list
+  st.session_state.detection_frame_count = detection_frame_count
+  st.session_state.detected_classes = detected_classes
+  st.session_state.conf_threshold = conf_threshold
+
 
 def process_precise_video(video_path, model, conf_threshold):
   
@@ -188,74 +179,12 @@ def process_precise_video(video_path, model, conf_threshold):
   # 종료
   cap.release()
   out.release()
+
+  st.session_state.detection_frame_count = detection_frame_count
+  st.session_state.detected_classes = detected_classes
+  st.session_state.temp_output = temp_output
+  st.session_state.conf_threshold = conf_threshold
   
   st.success("분석 완료!")
   
-  # -----------------------------
-  # H.264 변환
-  # -----------------------------
-  final_output = tempfile.NamedTemporaryFile(
-      delete=False,
-      suffix=".mp4"
-  ).name
-  
-  command = [
-      "ffmpeg",
-      "-y",
-      "-i",
-      temp_output,
-      "-vcodec",
-      "libx264",
-      "-acodec",
-      "aac",
-      final_output
-  ]
-
-  try:
-      subprocess.run(
-          command,
-          check=True
-      )
-  
-  except Exception as e:
-  
-      st.error(f"영상 변환 실패: {e}")
-  
-  st.success("영상 생성 완료!")    
-  
-  
-  # -----------------------------
-  # 결과 영상 표시
-  # -----------------------------
-  st.video(final_output)
-  
-  # -----------------------------
-  # 다운로드 버튼
-  # -----------------------------
-  with open(final_output, "rb") as file:
-      st.download_button(
-          label="결과 영상 다운로드",
-          data=file,
-          file_name="result.mp4",
-          mime="video/mp4"
-      )
-  
-  
-  # -----------------------------------
-  # 결과 출력
-  # -----------------------------------
-  
-  st.header("📊 병해충 탐지 결과")
-  
-  st.info(
-  f"현재 신뢰도 임계값 (Confidence Threshold): {conf_threshold}"
-  )
-  
-  if detection_frame_count == 0:
-  
-      st.success("✅ 병해충이 탐지되지 않았습니다.")
-  
-  else:
-      for class_id in detected_classes:
-          utility.show_disease_info(class_id)
   
