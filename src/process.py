@@ -17,16 +17,9 @@ def process_image(uploaded_file, model, conf_threshold):
   
   results = model(image, conf=conf_threshold)
 
-  annotated_frame = results[0].plot()
-  class_id, conf, detection = utility.parse_detection_result(results)
+  detection_result = utility.parse_detection_result(results)
 
-  class_id, conf, detection = utility.parse_detection_result(results)
-  result_list.append({
-      "annotated_frame": annotated_frame,
-      "class_id": class_id,
-      "conf": conf,
-      "detection": detection
-  })
+  result_list.append(detection_result)
 
   st.session_state.result_list = result_list
 
@@ -63,14 +56,9 @@ def process_fast_video(video_path, model, conf_threshold):
   
           results = model(frame, conf=conf_threshold)
 
-          annotated_frame = results[0].plot()
-          class_id, conf, detection = utility.parse_detection_result(results)
-          result_list.append({
-              "annotated_frame": annotated_frame,
-              "class_id": class_id,
-              "conf": conf,
-              "detection": detection
-          })
+          detection_result = utility.parse_detection_result(results)
+        
+          result_list.append(detection_result)
         
           if detection:
               detection_frame_count += 1
