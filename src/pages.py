@@ -8,13 +8,11 @@ import os
 from src import process
 from src import utility
 
-with st.spinner("AI가 병해충을 분석중입니다..."):
+@st.cache_resource
+def load_model():
+    return YOLO("best.pt")
 
-    @st.cache_resource
-    def load_model():
-        return YOLO("best.pt")
-    
-    model = load_model()
+model = load_model()
 
 
 def page_home():
@@ -356,49 +354,17 @@ def page_result():
                   utility.show_disease_info(class_id)
                   
         elif st.session_state.analysis_type == "precise":
-    
-          # -----------------------------
-          # H.264 변환
-          # -----------------------------
-          final_output = tempfile.NamedTemporaryFile(
-              delete=False,
-              suffix=".mp4"
-          ).name
-          
-          command = [
-              "ffmpeg",
-              "-y",
-              "-i",
-              analysis_result["temp_output"],
-              "-vcodec",
-              "libx264",
-              "-acodec",
-              "aac",
-              final_output
-          ]
-        
-          try:
-              subprocess.run(
-                  command,
-                  check=True
-              )
-          
-          except Exception as e:
-          
-              st.error(f"영상 변환 실패: {e}")
-          
-          st.success("영상 생성 완료!")    
           
           
           # -----------------------------
           # 결과 영상 표시
           # -----------------------------
-          st.video(final_output)
+          st.video(analysis_result["final_output"])
           
           # -----------------------------
           # 다운로드 버튼
           # -----------------------------
-          with open(final_output, "rb") as file:
+          with open(analysis_result["final_output"], "rb") as file:
               st.download_button(
                   label="결과 영상 다운로드",
                   data=file,
@@ -441,10 +407,12 @@ def page_result():
         
             os.remove(video_path)
     
-      st.session_state.uploaded_file = None
-      st.session_state.video_path = None
-      
-      go_to("home")
+        st.session_state.uploaded_file = None
+        st.session_state.video_path = None
+        st.session_state.analysis_result = None
+        st.session_state.analysis_type = None
+          
+        go_to("home")
   
       
 
