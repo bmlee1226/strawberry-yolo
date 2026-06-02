@@ -5,7 +5,6 @@ import cv2
 import tempfile
 import subprocess
 import time
-import tempfile
 
 from src import utility
 from src.disease_data import disease_info
