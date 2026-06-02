@@ -1,7 +1,9 @@
 import streamlit as st
-import process
 from ultralytics import YOLO
+
 import tempfile
+
+from src import process
 from src import utility
 
 def page_home():
