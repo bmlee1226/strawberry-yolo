@@ -6,6 +6,15 @@ import tempfile
 from src import process
 from src import utility
 
+with st.spinner("AI가 병해충을 분석중입니다..."):
+
+    @st.cache_resource
+    def load_model():
+        return YOLO("best.pt")
+    
+    model = load_model()
+
+
 def page_home():
   st.title("🍓 딸기 병해충 진단 AI")
   
@@ -76,9 +85,7 @@ def page_home():
           use_container_width=True
       ):
   
-          st.session_state.page = "image"
-  
-          st.rerun()
+          go_to("image")
           
       
   
@@ -99,9 +106,7 @@ def page_home():
           use_container_width=True
       ):
   
-          st.session_state.page = "video"
-  
-          st.rerun()
+          go_to("video")
 
 def page_image():
   
@@ -123,9 +128,7 @@ def page_image():
       st.success("✅ 이미지 업로드 완료")
   
       # 결과 페이지로 이동
-      st.session_state.page = "result"
-  
-      st.rerun()
+      go_to("result")
   
   elif camera_image:
       st.session_state.uploaded_file = camera_image
@@ -133,9 +136,7 @@ def page_image():
       st.success("✅ 이미지 업로드 완료")
   
       # 결과 페이지로 이동
-      st.session_state.page = "result"
-  
-      st.rerun()
+      go_to("result")
 
 def page_video():
   
@@ -162,13 +163,12 @@ def page_video():
       )
   
       tfile.write(video_bytes)
+      tfile.close()
   
       # session_state 저장
-      st.session_state.video_path = tfile.name
-  
-  
       video_path = tfile.name
-  
+      st.session_state.video_path = video_path
+ 
       # -----------------------------
       # 영상 정보 읽기
       # -----------------------------
@@ -185,13 +185,13 @@ def page_video():
       col1, col2, col3 = st.columns(3)
   
       with col1:
-          st.metric("FPS", f"{video_info_dic["fps"]:.1f}")
+          st.metric("FPS", f"{video_info_dic['fps']:.1f}")
   
       with col2:
-          st.metric("총 프레임", video_info_dic["total_frames"])
+          st.metric("총 프레임", video_info_dic['total_frames'])
   
       with col3:
-          st.metric("영상 길이", f"{video_info_dic["duration"]:.1f}초")
+          st.metric("영상 길이", f"{video_info_dic['duration']:.1f}초")
   
       # -----------------------------
       # 예상 소요 시간 계산
@@ -244,12 +244,10 @@ def page_video():
           ):
   
               st.success("빠른 분석 시작!")
+              st.session_state.analysis_type = "fast"
   
               # 결과 페이지로 이동
-              st.session_state.page = "result"
-              st.session_state.analysis_type = "fast"
-      
-              st.rerun()
+              go_to("result")
   
       # -----------------------------
       # 정밀 분석
@@ -273,12 +271,10 @@ def page_video():
           ):
   
               st.success("정밀 분석 시작!")
+              st.session_state.analysis_type = "precise"
   
               # 결과 페이지로 이동
-              st.session_state.page = "result"
-              st.session_state.analysis_type = "precise"
-      
-              st.rerun()
+              go_to("result")
 
 def page_result():
   st.title("📊 분석 결과")
@@ -287,14 +283,6 @@ def page_result():
   conf_threshold = st.session_state.conf_threshold
   
   file_type = uploaded_file.type
-  
-  with st.spinner("AI가 병해충을 분석중입니다..."):
-  
-      @st.cache_resource
-      def load_model():
-          return YOLO("best.pt")
-      
-      model = load_model()
   
   # 이미지인 경우
   if "image" in file_type:
@@ -317,9 +305,16 @@ def page_result():
   
   
   if st.button("🔙 처음으로"):
-  
-      st.session_state.page = "upload"
-  
+    
       st.session_state.uploaded_file = None
+      
+      go_to("home")
   
-      st.rerun()
+      
+
+
+def go_to(page):
+
+    st.session_state.page = page
+
+    st.rerun()
