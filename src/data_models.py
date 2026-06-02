@@ -19,9 +19,9 @@ class VideoInfo:
 
 @dataclass
 class AnalysisResult:
-    result_list: list[DetectionResult]
-    detected_classes: set[int]
-    detection_frame_count: int
-    conf_threshold: float
-    temp_output : str
+    result_list: list[DetectionResult] = field(default_factory=list)
+    detected_classes: set[int] = field(default_factory=set)
+    detection_frame_count: int = 0
+    conf_threshold: float = 0.3
+    temp_output : str = ''
     final_output: str | None = None
