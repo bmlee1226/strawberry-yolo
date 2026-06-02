@@ -311,23 +311,22 @@ def page_result():
 
     uploaded_file = st.session_state.uploaded_file
     file_type = uploaded_file.type
-
-    st.title("📊 분석 결과")
-
+    
     if "image" in file_type:
         result_list = st.session_state.result_list
+        result = result_list[0]
         
-        utility.render_detection_result(result_list[0], result_list[1], result_list[2], result_list[3])
+        utility.render_detection_result(result["annotated_frame"], result["class_id"], result["conf"], result["detection"])
 
-        if result_list[3]:
-            utility.show_disease_info(result_list[1])
+        if result["detection"]:
+            utility.show_disease_info(result["class_id"])
     
     elif "video" in file_type:
         if st.session_state.analysis_type == "fast":
             result_list = st.session_state.result_list
             
-            for results, class_id, conf, detection in result_list:
-                utility.render_detection_result(results, class_id, conf, detection)
+            for result in result_list:
+                utility.render_detection_result(result["annotated_frame"], result["class_id"], result["conf"], result["detection"])
             
             # -----------------------------------
             # 결과 출력
