@@ -180,11 +180,44 @@ def process_precise_video(video_path, model, conf_threshold):
   # 종료
   cap.release()
   out.release()
+  
+  # -----------------------------
+  # H.264 변환
+  # -----------------------------
+  final_output = tempfile.NamedTemporaryFile(
+      delete=False,
+      suffix=".mp4"
+  ).name
+  
+  command = [
+      "ffmpeg",
+      "-y",
+      "-i",
+      analysis_result["temp_output"],
+      "-vcodec",
+      "libx264",
+      "-acodec",
+      "aac",
+      final_output
+  ]
+  
+  try:
+      subprocess.run(
+          command,
+          check=True
+      )
+  
+  except Exception as e:
+  
+      st.error(f"영상 변환 실패: {e}")
+  
+  st.success("영상 생성 완료!")    
 
   return {"detection_frame_count" : detection_frame_count,
           "detected_classes" : detected_classes,
           "temp_output" : temp_output,
-          "conf_threshold" : conf_threshold}
+          "conf_threshold" : conf_threshold,
+          "final_output" : final_output}
   
   st.success("분석 완료!")
   
