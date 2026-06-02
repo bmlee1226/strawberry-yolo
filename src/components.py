@@ -38,6 +38,7 @@ def init_session_state():
         "uploaded_file": None,
         "video_path": None,
         "analysis_type": None,
+        "analysis_result": None,
         "conf_threshold": 0.3,
         "analysis_done": False
     }
