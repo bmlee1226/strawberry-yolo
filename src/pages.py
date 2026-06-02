@@ -1,8 +1,6 @@
 import streamlit as st
 from ultralytics import YOLO
 
-import tempfile
-import subprocess
 import os
 
 from src import process
