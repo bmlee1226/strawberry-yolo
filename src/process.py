@@ -28,7 +28,7 @@ def process_fast_video(video_path, model, conf_threshold):
   
   frame_count = 0
 
-  detection_counts = 0
+  detection_frame_count = 0
   
   detected_classes = set()
   
@@ -54,7 +54,7 @@ def process_fast_video(video_path, model, conf_threshold):
           class_id, detection = utility.get_detection_result(results)
   
           if detection:
-              detection_counts += 1
+              detection_frame_count += 1
               detected_classes.add(class_id)
               
       frame_count += 1
@@ -72,7 +72,7 @@ def process_fast_video(video_path, model, conf_threshold):
   f"현재 신뢰도 임계값 (Confidence Threshold): {conf_threshold}"
   )
   
-  if detection_counts == 0:
+  if detection_frame_count == 0:
   
       st.success("✅ 병해충이 탐지되지 않았습니다.")
   
@@ -90,7 +90,10 @@ def process_precise_video(video_path, model, conf_threshold):
   # 결과 영상 저장 경로
   # -----------------------------
   
-  temp_output = "temp_result.mp4"
+  temp_output = tempfile.NamedTemporaryFile(
+    delete=False,
+    suffix=".mp4"
+).name
   
   fourcc = cv2.VideoWriter_fourcc(*"mp4v")
   
@@ -114,7 +117,7 @@ def process_precise_video(video_path, model, conf_threshold):
   
   frame_idx = 0
   
-  detection_counts = 0
+  detection_frame_count = 0
   
   detected_classes = set()
   
@@ -133,7 +136,7 @@ def process_precise_video(video_path, model, conf_threshold):
   
       if len(results[0].boxes) > 0:
   
-          detection_counts += 1
+          detection_frame_count += 1
   
           best_idx = results[0].boxes.conf.argmax()
       
@@ -195,7 +198,10 @@ def process_precise_video(video_path, model, conf_threshold):
   # -----------------------------
   # H.264 변환
   # -----------------------------
-  final_output = "final_result.mp4"
+  final_output = tempfile.NamedTemporaryFile(
+      delete=False,
+      suffix=".mp4"
+  ).name
   
   command = [
       "ffmpeg",
@@ -249,7 +255,7 @@ def process_precise_video(video_path, model, conf_threshold):
   f"현재 신뢰도 임계값 (Confidence Threshold): {conf_threshold}"
   )
   
-  if detection_counts == 0:
+  if detection_frame_count == 0:
   
       st.success("✅ 병해충이 탐지되지 않았습니다.")
   
