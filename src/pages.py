@@ -172,7 +172,7 @@ def page_video():
       # 영상 정보 읽기
       # -----------------------------
   
-      video_info_dic = utility.get_video_info(video_path)
+      videoinfo = utility.get_video_info(video_path)
   
       # -----------------------------
       # 영상 정보 표시
@@ -184,13 +184,13 @@ def page_video():
       col1, col2, col3 = st.columns(3)
   
       with col1:
-          st.metric("FPS", f"{video_info_dic['fps']:.1f}")
+          st.metric("FPS", f"{videoinfo.fps:.1f}")
   
       with col2:
-          st.metric("총 프레임", video_info_dic['total_frames'])
+          st.metric("총 프레임", videoinfo.total_frames)
   
       with col3:
-          st.metric("영상 길이", f"{video_info_dic['duration']:.1f}초")
+          st.metric("영상 길이", f"{videoinfo.duration:.1f}초")
   
       # -----------------------------
       # 예상 소요 시간 계산
@@ -199,9 +199,9 @@ def page_video():
       # 빠른 분석 = 1초당 1프레임
       # 정밀 분석 = 모든 프레임
   
-      fast_analysis_frames = int(video_info_dic["duration"])
+      fast_analysis_frames = int(videoinfo.duration)
   
-      precise_analysis_frames = video_info_dic["total_frames"]
+      precise_analysis_frames = videoinfo.total_frames
   
       # 대략적인 처리 속도 가정
       # GPU/모델에 따라 수정 가능
