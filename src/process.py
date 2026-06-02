@@ -181,7 +181,8 @@ def process_precise_video(video_path, model, conf_threshold):
   # 종료
   cap.release()
   out.release()
-  
+
+  st.success("분석 완료!")
   # -----------------------------
   # H.264 변환
   # -----------------------------
@@ -219,7 +220,5 @@ def process_precise_video(video_path, model, conf_threshold):
           "temp_output" : temp_output,
           "conf_threshold" : conf_threshold,
           "final_output" : final_output}
-  
-  st.success("분석 완료!")
   
   
