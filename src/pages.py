@@ -315,7 +315,7 @@ def page_result():
     analysis_result = st.session_state.analysis_result
     
     if "image" in file_type:
-        result_list = analysis_result["result_list"]
+        result_list = analysis_result.result_list
         detection_result = result_list[0]
         
         utility.render_detection_result(detection_result.annotated_frame, 
@@ -328,7 +328,7 @@ def page_result():
     
     elif "video" in file_type:
         if st.session_state.analysis_type == "fast":
-            result_list = analysis_result["result_list"]
+            result_list = analysis_result.result_list
             
             for detection_result in result_list:
                 utility.render_detection_result(detection_result.annotated_frame, 
@@ -343,15 +343,15 @@ def page_result():
             st.header("📊 병해충 탐지 결과")
             
             st.info(
-            f"현재 신뢰도 임계값 (Confidence Threshold): {analysis_result["conf_threshold"]}"
+            f"현재 신뢰도 임계값 (Confidence Threshold): {analysis_result.conf_threshold}"
             )
             
-            if analysis_result["detection_frame_count"] == 0:
+            if analysis_result.detection_frame_count == 0:
             
               st.success("✅ 병해충이 탐지되지 않았습니다.")
             
             else:
-              for class_id in analysis_result["detected_classes"]:
+              for class_id in analysis_result.detected_classes:
                   utility.show_disease_info(class_id)
                   
         elif st.session_state.analysis_type == "precise":
@@ -360,12 +360,12 @@ def page_result():
           # -----------------------------
           # 결과 영상 표시
           # -----------------------------
-          st.video(analysis_result["final_output"])
+          st.video(analysis_result.final_output)
           
           # -----------------------------
           # 다운로드 버튼
           # -----------------------------
-          with open(analysis_result["final_output"], "rb") as file:
+          with open(analysis_result.final_output, "rb") as file:
               st.download_button(
                   label="결과 영상 다운로드",
                   data=file,
@@ -381,20 +381,20 @@ def page_result():
           st.header("📊 병해충 탐지 결과")
           
           st.info(
-          f"현재 신뢰도 임계값 (Confidence Threshold): {analysis_result["conf_threshold"]}"
+          f"현재 신뢰도 임계값 (Confidence Threshold): {analysis_result.conf_threshold}"
           )
           
-          if analysis_result["detection_frame_count"] == 0:
+          if analysis_result.detection_frame_count == 0:
           
               st.success("✅ 병해충이 탐지되지 않았습니다.")
           
           else:
-              for class_id in analysis_result["detected_classes"]:
+              for class_id in analysis_result.detected_classes:
                   utility.show_disease_info(class_id)
         
     if st.button("🔙 처음으로"):
 
-        temp_output = analysis_result["temp_output"]
+        temp_output = analysis_result.temp_output
     
         if temp_output and os.path.exists(temp_output):
     
