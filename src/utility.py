@@ -2,7 +2,7 @@ import cv2
 import streamlit as st
 
 from src.disease_data import disease_info
-from src.types import DetectionResult
+from src.data_models import DetectionResult, VideoInfo
 
 def show_disease_info(class_id):
 
@@ -92,10 +92,8 @@ def get_video_info(video_path):
 
     cap.release()
 
-    return {
-        "fps": fps,
-        "width": width,
-        "height": height,
-        "total_frames": total_frames,
-        "duration": duration
-    }
+    return VideoInfo{fps=fps,
+                     width=width,
+                     height=height,
+                     total_frames=total_frames,
+                     duration=duration)
