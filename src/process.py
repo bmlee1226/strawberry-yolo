@@ -3,6 +3,7 @@ from PIL import Image
 import cv2
 
 import time
+import subprocess
 
 from src import utility
 from src.disease_data import disease_info
