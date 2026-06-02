@@ -16,9 +16,17 @@ def process_image(uploaded_file, model, conf_threshold):
   result_list = []
   
   results = model(image, conf=conf_threshold)
-  
+
+  annotated_frame = results[0].plot()
   class_id, conf, detection = utility.parse_detection_result(results)
-  result_list += [results, class_id, conf, detection]
+
+  class_id, conf, detection = utility.parse_detection_result(results)
+  result_list.append({
+      "annotated_frame": annotated_frame,
+      "class_id": class_id,
+      "conf": conf,
+      "detection": detection
+  })
 
   st.session_state.result_list = result_list
 
@@ -54,10 +62,16 @@ def process_fast_video(video_path, model, conf_threshold):
       if frame_count % int(video_info_dic["fps"]) == 0:
   
           results = model(frame, conf=conf_threshold)
-  
+
+          annotated_frame = results[0].plot()
           class_id, conf, detection = utility.parse_detection_result(results)
-          result_list += [[results, class_id, conf, detection]]
-  
+          result_list.append({
+              "annotated_frame": annotated_frame,
+              "class_id": class_id,
+              "conf": conf,
+              "detection": detection
+          })
+        
           if detection:
               detection_frame_count += 1
               detected_classes.add(class_id)
@@ -128,7 +142,7 @@ def process_precise_video(video_path, model, conf_threshold):
       results = model(frame, conf=conf_threshold)
       class_id, conf, detection = utility.parse_detection_result(results)
 
-      if class_id:
+      if class_id is not None:
         detected_classes.add(class_id)
         detection_frame_count += 1
   
