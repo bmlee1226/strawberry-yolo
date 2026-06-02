@@ -318,10 +318,7 @@ def page_result():
         result_list = analysis_result.result_list
         detection_result = result_list[0]
         
-        utility.render_detection_result(detection_result.annotated_frame, 
-                                        detection_result.class_id, 
-                                        detection_result.conf, 
-                                        detection_result.detection)
+        utility.render_detection_result(detection_result)
 
         if detection_result.detection:
             utility.show_disease_info(detection_result.class_id)
@@ -331,10 +328,7 @@ def page_result():
             result_list = analysis_result.result_list
             
             for detection_result in result_list:
-                utility.render_detection_result(detection_result.annotated_frame, 
-                                                detection_result.class_id,
-                                                detection_result.conf, 
-                                                detection_result.detection)
+                utility.render_detection_result(detection_result)
             
             # -----------------------------------
             # 결과 출력
