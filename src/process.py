@@ -15,7 +15,8 @@ def process_image(uploaded_file, model, conf_threshold):
   
   results = model(image, conf=conf_threshold)
   
-  class_id, detection = utility.get_detection_result(results)
+  class_id, conf, detection = utility.parse_detection_result(results)
+  utility.render_detection_result(results, class_id, conf, detection)
   
   if detection:
       utility.show_disease_info(class_id)
@@ -51,7 +52,8 @@ def process_fast_video(video_path, model, conf_threshold):
   
           results = model(frame, conf=conf_threshold)
   
-          class_id, detection = utility.get_detection_result(results)
+          class_id, conf, detection = utility.parse_detection_result(results)
+          utility.render_detection_result(results, class_id, conf, detection)
   
           if detection:
               detection_frame_count += 1
@@ -133,18 +135,11 @@ def process_precise_video(video_path, model, conf_threshold):
   
       # YOLO 추론
       results = model(frame, conf=conf_threshold)
-  
-      if len(results[0].boxes) > 0:
-  
-          detection_frame_count += 1
-  
-          best_idx = results[0].boxes.conf.argmax()
-      
-          class_id = int(results[0].boxes.cls[best_idx])
-  
-          info = disease_info[class_id]
-  
-          detected_classes.add(class_id)
+      class_id, conf, detection = utility.parse_detection_result(results)
+
+      if class_id:
+        detected_classes.add(class_id)
+        detection_frame_count += 1
   
       # bbox 그려진 결과 프레임
       annotated_frame = results[0].plot()
