@@ -5,7 +5,7 @@ from src.disease_data import disease_info
 
 def show_disease_info(class_id):
 
-    info = disease_info[class_id]
+    info = disease_info.get(class_id)
 
     st.header(f"🩺 {info['name']}  병해충 정보")
 
@@ -21,38 +21,76 @@ def show_disease_info(class_id):
 
         st.caption(info["name"])
 
-def get_detection_result(results):
-    detection = False
-    class_id = None
+# def get_detection_result(results):
+#     detection = False
+#     class_id = None
 
+#     result = results[0]
+
+#     col1, col2 = st.columns(2)
+
+#     with col1:
+#         st.image(result.plot())
+    
+#     with col2:
+#         if len(result.boxes) == 0:
+#             st.subheader("탐지된 병해충이 없습니다.")
+#             st.success("건강한 딸기로 보입니다 🍓")
+    
+#         else:
+#             detection = True
+            
+#             best_idx = result.boxes.conf.argmax()
+        
+#             class_id = int(result.boxes.cls[best_idx])
+        
+#             conf = float(result.boxes.conf[best_idx])
+        
+#             info = disease_info.get(class_id)
+    
+#             st.subheader(info["explain"])
+    
+#             st.progress(conf)
+    
+#             st.write(f"신뢰도: {conf:.2f}")
+
+#     return class_id, detection
+
+def parse_detection_result(results):
+    result = results[0]
+
+    if len(result.boxes) == 0:
+        return None, None, False
+
+    else:
+        best_idx = result.boxes.conf.argmax()
+    
+        class_id = int(result.boxes.cls[best_idx])
+    
+        conf = float(result.boxes.conf[best_idx])
+
+    return class_id, conf, True
+
+
+def render_detection_result(results, class_id, conf, detected):
     col1, col2 = st.columns(2)
 
     with col1:
         st.image(results[0].plot())
     
     with col2:
-        if len(results[0].boxes) == 0:
-            st.subheader("탐지된 병해충이 없습니다.")
-            st.success("건강한 딸기로 보입니다 🍓")
-    
-        else:
-            detection = True
-            
-            best_idx = results[0].boxes.conf.argmax()
-        
-            class_id = int(results[0].boxes.cls[best_idx])
-        
-            conf = float(results[0].boxes.conf[best_idx])
-        
-            info = disease_info[class_id]
+        if detected:
+            info = disease_info.get(class_id)
     
             st.subheader(info["explain"])
     
             st.progress(conf)
     
             st.write(f"신뢰도: {conf:.2f}")
-
-    return class_id, detection
+    
+        else:
+            st.subheader("탐지된 병해충이 없습니다.")
+            st.success("건강한 딸기로 보입니다 🍓")
 
 
 def get_video_info(video_path):
