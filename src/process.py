@@ -5,7 +5,7 @@ import cv2
 from src import utility
 from src.disease_data import disease_info
 
-def process_image(uploaded_file, model):
+def process_image(uploaded_file, model, conf_threshold):
   image = Image.open(uploaded_file)
   
   st.divider()
@@ -17,7 +17,7 @@ def process_image(uploaded_file, model):
   if detection ==True:
       utility.show_disease_info(class_id)
 
-def process_fast_video(video_path, model):
+def process_fast_video(video_path, model, conf_threshold):
   
   video_info_dic = utility.get_video_info(video_path)
   
@@ -77,7 +77,7 @@ def process_fast_video(video_path, model):
       for class_id in detected_classes:
           utility.show_disease_info(class_id)
 
-def process_precise_video(video_path, model):
+def process_precise_video(video_path, model, conf_threshold):
   
   video_info_dic = utility.get_video_info(video_path)
   
