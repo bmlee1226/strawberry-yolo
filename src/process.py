@@ -3,7 +3,6 @@ from PIL import Image
 import cv2
 
 import time
-import subprocess
 import tempfile
 
 from src import utility
