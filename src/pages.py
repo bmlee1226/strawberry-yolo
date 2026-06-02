@@ -3,6 +3,7 @@ from ultralytics import YOLO
 
 import tempfile
 import subprocess
+import os
 
 from src import process
 from src import utility
@@ -417,8 +418,26 @@ def page_result():
                   utility.show_disease_info(class_id)
         
     if st.button("🔙 처음으로"):
+
+        temp_output = st.session_state.get(
+            "temp_output"
+        )
+    
+        if temp_output and os.path.exists(temp_output):
+    
+            os.remove(temp_output)
+
+        video_path = st.session_state.get(
+            "video_path"
+        )
+        
+        if video_path and os.path.exists(video_path):
+        
+            os.remove(video_path)
     
       st.session_state.uploaded_file = None
+      st.session_state.video_path = None
+      st.session_state.temp_output = None
       
       go_to("home")
   
