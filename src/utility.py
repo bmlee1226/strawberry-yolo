@@ -4,7 +4,7 @@ import streamlit as st
 from src.disease_data import disease_info
 from src.data_models import DetectionResult, VideoInfo
 
-def show_disease_info(class_id):
+def show_disease_info(class_id: int) -> None:
 
     info = disease_info.get(class_id)
 
@@ -23,7 +23,7 @@ def show_disease_info(class_id):
         st.caption(info["name"])
 
 
-def parse_detection_result(results):
+def parse_detection_result(results) -> DetectionResult:
     result = results[0]
     annotated_frame = result.plot()
 
@@ -50,28 +50,28 @@ def parse_detection_result(results):
     )
 
 
-def render_detection_result(annotated_frame, class_id, conf, detected):
+def render_detection_result(result: DetectionResult):
     col1, col2 = st.columns(2)
 
     with col1:
-        st.image(annotated_frame)
+        st.image(result.annotated_frame, channels="BGR")
     
     with col2:
-        if detected:
-            info = disease_info.get(class_id)
+        if result.detected:
+            info = disease_info.get(result.class_id)
     
             st.subheader(info["explain"])
     
-            st.progress(conf)
+            st.progress(result.conf)
     
-            st.write(f"신뢰도: {conf:.2f}")
+            st.write(f"신뢰도: {result.conf:.2f}")
     
         else:
             st.subheader("탐지된 병해충이 없습니다.")
             st.success("건강한 딸기로 보입니다 🍓")
 
 
-def get_video_info(video_path):
+def get_video_info(video_path : str) -> VideoInfo:
 
     cap = cv2.VideoCapture(video_path)
 
@@ -92,7 +92,7 @@ def get_video_info(video_path):
 
     cap.release()
 
-    return VideoInfo{fps=fps,
+    return VideoInfo(fps=fps,
                      width=width,
                      height=height,
                      total_frames=total_frames,
