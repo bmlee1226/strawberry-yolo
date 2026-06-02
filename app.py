@@ -5,6 +5,7 @@ import tempfile
 import cv2
 import subprocess
 import time
+from src import pages
 
 # -----------------------------------
 # session_state 초기화
