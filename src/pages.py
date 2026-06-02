@@ -303,7 +303,7 @@ def page_analysis():
           video_path = st.session_state.video_path
           process.process_precise_video(video_path, model, conf_threshold)
 
-    go_to("result")
+  go_to("result")
   
 
 def page_result():
