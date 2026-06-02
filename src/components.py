@@ -8,7 +8,6 @@ ANALYSIS_PAGE = "analysis"
 RESULT_PAGE = "result"
 
 def router():
-
   page = st.session_state.page
   
   if page == HOME_PAGE:
@@ -28,23 +27,23 @@ def router():
 
 def init_session_state():
 
-    defaults = {
-        "page": "home",
-        "uploaded_file": None,
-        "video_path": None,
-        "analysis_type": None,
-        "conf_threshold": 0.3
-    }
-
-    for key, value in defaults.items():
-
-        if key not in st.session_state:
-            st.session_state[key] = value
+  defaults = {
+      "page": "home",
+      "uploaded_file": None,
+      "video_path": None,
+      "analysis_type": None,
+      "conf_threshold": 0.3
+  }
+  
+  for key, value in defaults.items():
+  
+      if key not in st.session_state:
+          st.session_state[key] = value
 
 def render_footer():
 
-    st.markdown("---")
-
-    st.caption(
-        "YOLO 기반 딸기 병해충 진단 시스템"
-    )
+  st.markdown("---")
+  
+  st.caption(
+      "YOLO 기반 딸기 병해충 진단 시스템"
+  )
