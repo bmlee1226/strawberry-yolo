@@ -21,7 +21,7 @@ def process_image(uploaded_file, model, conf_threshold):
 
   result_list.append(detection_result)
 
-  st.session_state.result_list = result_list
+  return {"result_list" : result_list}
 
 def process_fast_video(video_path, model, conf_threshold):
   
@@ -69,10 +69,10 @@ def process_fast_video(video_path, model, conf_threshold):
   progress_bar.empty()
   cap.release()
 
-  st.session_state.result_list = result_list
-  st.session_state.detection_frame_count = detection_frame_count
-  st.session_state.detected_classes = detected_classes
-  st.session_state.conf_threshold = conf_threshold
+  return {"result_list" : result_list,
+          "detection_frame_count" : detection_frame_count,
+          "detected_classes" : detected_classes,
+          "conf_threshold" : conf_threshold}
 
 
 def process_precise_video(video_path, model, conf_threshold):
@@ -181,10 +181,10 @@ def process_precise_video(video_path, model, conf_threshold):
   cap.release()
   out.release()
 
-  st.session_state.detection_frame_count = detection_frame_count
-  st.session_state.detected_classes = detected_classes
-  st.session_state.temp_output = temp_output
-  st.session_state.conf_threshold = conf_threshold
+  return {"detection_frame_count" : detection_frame_count,
+          "detected_classes" : detected_classes,
+          "temp_output" : temp_output,
+          "conf_threshold" : conf_threshold}
   
   st.success("분석 완료!")
   
