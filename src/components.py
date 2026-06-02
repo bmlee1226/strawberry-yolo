@@ -12,19 +12,19 @@ def router():
   page = st.session_state.page
   
   if page == HOME_PAGE:
-      pages.page_home()
+    pages.page_home()
   
   elif page == IMAGE_PAGE:
-      pages.page_image()
+    pages.page_image()
           
   elif page == VIDEO_PAGE:
-      pages.page_video()
+    pages.page_video()
   
   elif page == ANALYSIS_PAGE:
-      pages.page_analysis()
+    pages.page_analysis()
   
   elif page == RESULT_PAGE:
-      pages.page_result()
+    pages.page_result()
 
 def init_session_state():
 
