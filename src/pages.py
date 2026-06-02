@@ -311,11 +311,11 @@ def page_result():
     uploaded_file = st.session_state.uploaded_file
     file_type = uploaded_file.type
 
-    result_list = st.session_state.result_list
-
     st.title("📊 분석 결과")
 
     if "image" in file_type:
+        result_list = st.session_state.result_list
+        
         utility.render_detection_result(result_list[0], result_list[1], result_list[2], result_list[3])
 
         if result_list[3]:
@@ -323,6 +323,8 @@ def page_result():
     
     elif "video" in file_type:
         if st.session_state.analysis_type == "fast":
+            result_list = st.session_state.result_list
+            
             for results, class_id, conf, detection in result_list:
                 utility.render_detection_result(results, class_id, conf, detection)
             
