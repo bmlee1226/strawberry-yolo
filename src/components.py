@@ -4,6 +4,7 @@ from src import pages
 HOME_PAGE = "home"
 IMAGE_PAGE = "image"
 VIDEO_PAGE = "video"
+ANALYSIS_PAGE = "anaysis"
 RESULT_PAGE = "result"
   
 def router():
@@ -19,6 +20,9 @@ def router():
     elif page == VIDEO_PAGE:
         pages.page_video()
     
+    elif page == ANALYSIS_PAGE:
+        pages.page_analysis()
+
     elif page == RESULT_PAGE:
         pages.page_result()
 
