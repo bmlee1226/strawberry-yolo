@@ -1,8 +1,9 @@
 import streamlit as st
 from PIL import Image
 import cv2
-from utility import show_disease_info, show_detection_result, get_video_info
-from disease_data import disease_info
+
+from src import utility
+from src.disease_data import disease_info
 
 def process_image(uploaded_file, model):
   image = Image.open(uploaded_file)
@@ -11,14 +12,14 @@ def process_image(uploaded_file, model):
   
   results = model(image, conf=conf_threshold)
   
-  class_id, detection = show_detection_result(results)
+  class_id, detection = utility.show_detection_result(results)
   
   if detection ==True:
-      show_disease_info(class_id)
+      utility.show_disease_info(class_id)
 
 def process_fast_video(video_path, model):
   
-  video_info_dic = get_video_info(video_path)
+  video_info_dic = utility.get_video_info(video_path)
   
   cap = cv2.VideoCapture(video_path)
   
@@ -48,7 +49,7 @@ def process_fast_video(video_path, model):
   
           results = model(frame, conf=conf_threshold)
   
-          class_id, detection = show_detection_result(results)
+          class_id, detection = utility.show_detection_result(results)
   
           if detection ==True:
               detection_counts += 1
@@ -74,11 +75,11 @@ def process_fast_video(video_path, model):
   
   else:
       for class_id in detected_classes:
-          show_disease_info(class_id)
+          utility.show_disease_info(class_id)
 
 def process_precise_video(video_path, model):
   
-  video_info_dic = get_video_info(video_path)
+  video_info_dic = utility.get_video_info(video_path)
   
   cap = cv2.VideoCapture(video_path)
   
@@ -238,5 +239,5 @@ def process_precise_video(video_path, model):
   
   else:
       for class_id in detected_classes:
-          show_disease_info(class_id)
+          utility.show_disease_info(class_id)
   
