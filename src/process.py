@@ -15,9 +15,9 @@ def process_image(uploaded_file, model, conf_threshold):
   
   results = model(image, conf=conf_threshold)
   
-  class_id, detection = utility.show_detection_result(results)
+  class_id, detection = utility.get_detection_result(results)
   
-  if detection ==True:
+  if detection:
       utility.show_disease_info(class_id)
 
 def process_fast_video(video_path, model, conf_threshold):
@@ -27,8 +27,7 @@ def process_fast_video(video_path, model, conf_threshold):
   cap = cv2.VideoCapture(video_path)
   
   frame_count = 0
-  saved_count = 0
-  
+
   detection_counts = 0
   
   detected_classes = set()
@@ -52,15 +51,16 @@ def process_fast_video(video_path, model, conf_threshold):
   
           results = model(frame, conf=conf_threshold)
   
-          class_id, detection = utility.show_detection_result(results)
+          class_id, detection = utility.get_detection_result(results)
   
-          if detection ==True:
+          if detection:
               detection_counts += 1
               detected_classes.add(class_id)
               
       frame_count += 1
   
   progress_bar.empty()
+  cap.release()
   
   # -----------------------------------
   # 결과 출력
@@ -129,7 +129,7 @@ def process_precise_video(video_path, model, conf_threshold):
           break
   
       # YOLO 추론
-      results = model(frame)
+      results = model(frame, conf=conf_threshold)
   
       if len(results[0].boxes) > 0:
   
@@ -151,7 +151,7 @@ def process_precise_video(video_path, model, conf_threshold):
   
       frame_idx += 1
   
-      progress = int(frame_idx / video_info_dic["total_frames"] * 100)
+      progress = frame_idx / video_info_dic["total_frames"]
       progress_bar.progress(progress)
   
       # -----------------------------
@@ -159,7 +159,7 @@ def process_precise_video(video_path, model, conf_threshold):
       # -----------------------------
       elapsed_time = time.time() - start_time
   
-      fps_processing = frame_idx / elapsed_time
+      fps_processing = frame_idx / max(elapsed_time, 0.001)
   
       remaining_frames = video_info_dic["total_frames"] - frame_idx
   
@@ -168,19 +168,24 @@ def process_precise_video(video_path, model, conf_threshold):
       # -----------------------------
       # 상태 표시
       # -----------------------------
-      status_text.text(
-          f"""
-          처리 프레임: {frame_idx}/{video_info_dic["total_frames"]}
-          처리 FPS: {fps_processing:.2f}
-          경과 시간: {elapsed_time:.1f}초
-          남은 예상 시간: {remaining_time:.1f}초
-          """
-      )
-  
-      preview_frame.image(
-          annotated_frame,
-          channels="BGR"
-      )
+
+      if frame_idx % 5 == 0:
+        status_text.text(
+            f"""
+            처리 프레임: {frame_idx}/{video_info_dic["total_frames"]}
+            처리 FPS: {fps_processing:.2f}
+            경과 시간: {elapsed_time:.1f}초
+            남은 예상 시간: {remaining_time:.1f}초
+            """
+        )
+    
+      if frame_idx % 10 == 0:
+      
+          preview_frame.image(
+              annotated_frame,
+              channels="BGR"
+          )
+        
   # 종료
   cap.release()
   out.release()
@@ -203,8 +208,16 @@ def process_precise_video(video_path, model, conf_threshold):
       "aac",
       final_output
   ]
+
+  try:
+      subprocess.run(
+          command,
+          check=True
+      )
   
-  subprocess.run(command)
+  except Exception as e:
+  
+      st.error(f"영상 변환 실패: {e}")
   
   st.success("영상 생성 완료!")    
   
