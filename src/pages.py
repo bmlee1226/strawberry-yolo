@@ -323,6 +323,19 @@ def page_result():
 
         if detection_result.detection:
             utility.show_disease_info(detection_result.class_id)
+
+        st.radio(
+    "결과가 맞나요?",
+    ["맞음", "틀림"]
+)
+        st.selectbox(
+    "실제 병해를 선택해주세요",
+    [
+        "정상",
+        "흰가루병",
+        "잿빛곰팡이병"
+    ]
+)
     
     elif "video" in file_type:
         if st.session_state.analysis_type == "fast":
