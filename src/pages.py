@@ -3,6 +3,7 @@ from ultralytics import YOLO
 
 import os
 import tempfile
+from datetime import datetime
 
 from src import process
 from src import utility
@@ -336,6 +337,18 @@ def page_result():
         "잿빛곰팡이병"
     ]
 )
+
+        save_dir = "user_uploads"
+        os.makedirs(save_dir, exist_ok=True)
+        
+        filename = datetime.now().strftime("%Y%m%d_%H%M%S.jpg")
+        
+        with open(
+            os.path.join(save_dir, filename),
+            "wb"
+        ) as f:
+            f.write(uploaded_file.getbuffer())
+
     
     elif "video" in file_type:
         if st.session_state.analysis_type == "fast":
