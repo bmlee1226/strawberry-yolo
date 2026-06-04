@@ -160,7 +160,7 @@ def process_precise_video(video_path, model, conf_threshold):
       # 상태 표시
       # -----------------------------
 
-      if frame_idx % 5 == 0:
+      if frame_idx % 30 == 0:
         status_text.text(
             f"""
             처리 프레임: {frame_idx}/{videoinfo.total_frames}
@@ -170,7 +170,7 @@ def process_precise_video(video_path, model, conf_threshold):
             """
         )
     
-      if frame_idx % 30 == 0:
+      if frame_idx % 60 == 0:
       
           preview_frame.image(
               detection_result.annotated_frame,
