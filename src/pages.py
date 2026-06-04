@@ -81,7 +81,7 @@ def page_home():
       st.info("정지 이미지를 빠르게 분석")
   
       if st.button(
-          "이미지 분석",
+          "이미지 분석 시작하기",
           use_container_width=True
       ):
   
@@ -102,7 +102,7 @@ def page_home():
       st.info("넓은 구역 병해 탐지에 추천")
   
       if st.button(
-          "동영상 분석",
+          "동영상 분석 시작하기",
           use_container_width=True
       ):
   
